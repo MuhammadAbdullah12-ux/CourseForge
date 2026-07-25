@@ -14,6 +14,10 @@ dist/
 .next/
 out/
 
+# Project & Learning plans (Keep locally, do not upload to GitHub)
+CourseForge_Project_Plan.md.md
+CourseForge_Week1_Learning_Plan_1.md
+
 # Log files
 npm-debug.log*
 yarn-debug.log*
