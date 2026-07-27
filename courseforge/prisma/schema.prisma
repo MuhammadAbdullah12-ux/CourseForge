@@ -1,0 +1,62 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// 1. User Model (authenticated via Clerk)
+model User {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique
+  email     String   @unique
+  role      String   @default("STUDENT") // "STUDENT" | "INSTRUCTOR" | "ADMIN"
+  createdAt DateTime @default(now())
+  
+  // Relations
+  courses     Course[]     @relation("InstructorCourses")
+  enrollments Enrollment[]
+}
+
+// 2. Course Model (created by Instructors)
+model Course {
+  id            String   @id @default(cuid())
+  instructorId  String
+  instructor    User     @relation("InstructorCourses", fields: [instructorId], references: [id])
+  title         String
+  description   String
+  published     Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  
+  // Relations
+  lessons     Lesson[]
+  enrollments Enrollment[]
+}
+
+// 3. Lesson Model (modules inside a course)
+model Lesson {
+  id        String   @id @default(cuid())
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id])
+  title     String
+  content   String   @db.Text // Allows long text for lesson contents
+  order     Int
+  createdAt DateTime @default(now())
+}
+
+// 4. Enrollment Model (joins Users and Courses)
+model Enrollment {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id])
+  createdAt DateTime @default(now())
+
+  // Prevents a student from enrolling in the same course twice
+  @@unique([userId, courseId])
+}
