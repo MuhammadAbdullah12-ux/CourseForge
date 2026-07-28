@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { notFound } from "next/navigation";
-import { MOCK_COURSES } from "../../../data/mock-courses";
+import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,8 +16,15 @@ interface PageProps {
 export default async function CourseDetailPage({ params }: PageProps) {
   const { courseId } = await params;
 
-  // Search our mock courses database for the matching ID
-  const course = MOCK_COURSES.find((c) => c.id === courseId);
+  // Search our live Supabase database for the matching ID, including the instructor relation
+  const course = await prisma.course.findUnique({
+    where: {
+      id: courseId,
+    },
+    include: {
+      instructor: true,
+    },
+  });
 
   // If the course isn't found, trigger Next.js's native 404 handler
   if (!course) {
@@ -29,6 +36,9 @@ export default async function CourseDetailPage({ params }: PageProps) {
     month: "long",
     year: "numeric",
   });
+
+  // Truncate email to display as user name
+  const instructorName = course.instructor.email.split("@")[0];
 
   return (
     <main className="max-w-5xl mx-auto px-6 py-10 md:py-16 font-sans text-slate-200">
@@ -62,7 +72,7 @@ export default async function CourseDetailPage({ params }: PageProps) {
             <div className="flex flex-wrap gap-4 text-sm text-slate-400 pt-2 pb-4 border-b border-slate-800">
               <span className="flex items-center gap-1.5">
                 <User className="size-4 text-emerald-400" />
-                <span>Instructor: <strong>{course.instructorName}</strong></span>
+                <span>Instructor: <strong className="capitalize">{instructorName}</strong></span>
               </span>
               <span className="flex items-center gap-1.5">
                 <Calendar className="size-4 text-emerald-400" />

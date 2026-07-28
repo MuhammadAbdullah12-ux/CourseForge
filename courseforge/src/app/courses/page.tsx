@@ -1,11 +1,21 @@
 import Link from "next/link";
-import { MOCK_COURSES } from "../../data/mock-courses";
+import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BookOpen, User, Calendar } from "lucide-react";
 
-export default function CoursesPage() {
+export default async function CoursesPage() {
+  // Fetch all published courses from Supabase database, including the instructor relation
+  const courses = await prisma.course.findMany({
+    where: {
+      published: true,
+    },
+    include: {
+      instructor: true,
+    },
+  });
+
   return (
     <main className="max-w-5xl mx-auto px-6 py-12 md:py-20 font-sans">
       
@@ -21,7 +31,7 @@ export default function CoursesPage() {
         </div>
         <div>
           <Badge className="bg-emerald-500/15 text-emerald-400 border border-emerald-500/20 px-3 py-1 text-sm rounded-full">
-            {MOCK_COURSES.length} Courses Available
+            {courses.length} Courses Available
           </Badge>
         </div>
       </div>
@@ -29,12 +39,15 @@ export default function CoursesPage() {
       {/* Courses Grid Layout */}
       {/* 1 Column on Mobile, 2 Columns on Tablet, 3 Columns on Desktop */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {MOCK_COURSES.map((course) => {
+        {courses.map((course) => {
           // Format date string to display nicely
           const formattedDate = new Date(course.createdAt).toLocaleDateString("en-US", {
             month: "short",
             year: "numeric",
           });
+
+          // Truncate email to display as user name
+          const instructorName = course.instructor.email.split("@")[0];
 
           return (
             <Card key={course.id} className="flex flex-col justify-between border-slate-800 bg-slate-900/40 hover:bg-slate-900/60 hover:border-slate-700 active:scale-[0.99] transition-all duration-300">
@@ -55,7 +68,7 @@ export default function CoursesPage() {
                   </CardTitle>
                   <CardDescription className="flex items-center gap-1.5 text-slate-400 mt-2">
                     <User className="size-4 text-emerald-500/80" />
-                    <span>{course.instructorName}</span>
+                    <span className="capitalize">{instructorName}</span>
                   </CardDescription>
                 </CardHeader>
 
