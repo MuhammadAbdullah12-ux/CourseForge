@@ -5,9 +5,8 @@ export default defineConfig({
   // Path to your Prisma schema configuration
   schema: 'prisma/schema.prisma',
   
-  // Database connection settings reading from .env file
+  // Database connection settings (using the direct port 5432)
   datasource: {
     url: env('DATABASE_URL'),
-    directUrl: env('DIRECT_URL'),
   },
 })
