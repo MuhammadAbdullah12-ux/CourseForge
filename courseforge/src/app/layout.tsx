@@ -28,8 +28,9 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // 1. Resolve user session asynchronously on the server
-  const { userId } = await auth();
+  // 1. Resolve user session and custom role claims on the server
+  const { userId, sessionClaims } = await auth();
+  const userRole = sessionClaims?.metadata?.role;
 
   return (
     <ClerkProvider>
@@ -56,7 +57,14 @@ export default async function RootLayout({
                   Courses
                 </Link>
 
-                {/* 2. Show sign-in/up links if logged out, otherwise render UserButton dropdown */}
+                {/* 2. Render Instructor Dashboard Link ONLY if logged-in user has the INSTRUCTOR role */}
+                {userId && userRole === "INSTRUCTOR" && (
+                  <Link href="/dashboard/instructor" className="text-sm font-medium text-emerald-400 hover:text-emerald-300 transition-colors flex items-center gap-1">
+                    <span>Dashboard</span>
+                  </Link>
+                )}
+
+                {/* 3. Render Sign In / Sign Up links when signed out, otherwise render UserButton avatar */}
                 {!userId ? (
                   <>
                     <Link href="/sign-in" className="text-sm font-medium text-slate-300 hover:text-white transition-colors">

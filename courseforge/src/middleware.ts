@@ -9,8 +9,33 @@ const isPublicRoute = createRouteMatcher([
   '/sign-up(.*)',          // Sign-up screens
 ]);
 
+// 2. Define routes reserved strictly for INSTRUCTOR users
+const isInstructorRoute = createRouteMatcher([
+  '/dashboard/instructor(.*)',
+]);
+
 export default clerkMiddleware(async (auth, request) => {
-  // 2. Protect any routes that are NOT explicitly listed as public
+  // A. Enforce Role-Based Access Control (RBAC) on instructor routes
+  if (isInstructorRoute(request)) {
+    const { userId, sessionClaims } = await auth();
+
+    // If the user is not logged in, enforce sign-in redirect
+    if (!userId) {
+      await auth.protect();
+      return;
+    }
+
+    // Extract custom role claim from session token
+    const userRole = sessionClaims?.metadata?.role;
+
+    // If logged-in user is NOT an INSTRUCTOR (e.g. STUDENT), redirect to catalog
+    if (userRole !== "INSTRUCTOR") {
+      const catalogUrl = new URL("/courses", request.url);
+      return Response.redirect(catalogUrl);
+    }
+  }
+
+  // B. Protect any other private non-public routes
   if (!isPublicRoute(request)) {
     await auth.protect();
   }
