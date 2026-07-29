@@ -5,6 +5,7 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import { ClerkProvider, UserButton } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
+import { Github, Code2, Database, Shield, Zap } from "lucide-react";
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -82,7 +83,7 @@ export default async function RootLayout({
                   </Link>
                 )}
 
-                {/* Render Permanent Select Role Button (Works for both Guests and Logged-in Users) */}
+                {/* Render Permanent Select Role Button */}
                 <Link 
                   href="/select-role" 
                   title="Choose or switch between Student and Instructor access modes"
@@ -124,10 +125,72 @@ export default async function RootLayout({
             </nav>
           </header>
 
-          {/* Page Content */}
+          {/* Main Page Content Slot */}
           <div className="flex-1">
             {children}
           </div>
+
+          {/* Shared Sleek Dark-Mode Footer */}
+          <footer className="border-t border-slate-800 bg-slate-950/90 text-slate-400 py-12 text-sm mt-16">
+            <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-8">
+              
+              {/* Column 1: Brand Info */}
+              <div className="space-y-3 md:col-span-2">
+                <div className="flex items-center gap-2 font-bold text-slate-100 text-lg">
+                  <span className="bg-emerald-500/20 text-emerald-400 p-1.5 rounded-lg text-xs border border-emerald-500/30">
+                    CF
+                  </span>
+                  <span>CourseForge</span>
+                </div>
+                <p className="text-xs text-slate-400 max-w-sm leading-relaxed">
+                  An adaptive learning platform connecting students with expert instructors, lesson-scoped AI tutors, and real-time database persistence.
+                </p>
+                <div className="flex items-center gap-3 pt-2 text-xs text-slate-500">
+                  <span className="flex items-center gap-1"><Zap className="size-3 text-emerald-400" /> Next.js 16</span>
+                  <span className="flex items-center gap-1"><Database className="size-3 text-emerald-400" /> Supabase</span>
+                  <span className="flex items-center gap-1"><Shield className="size-3 text-emerald-400" /> Clerk</span>
+                  <span className="flex items-center gap-1"><Code2 className="size-3 text-emerald-400" /> Prisma 7</span>
+                </div>
+              </div>
+
+              {/* Column 2: Quick Links */}
+              <div className="space-y-2">
+                <h4 className="text-xs font-semibold text-slate-200 uppercase tracking-wider">Navigation</h4>
+                <ul className="space-y-1.5 text-xs">
+                  <li><Link href="/" className="hover:text-emerald-400 transition-colors">Home</Link></li>
+                  <li><Link href="/about" className="hover:text-emerald-400 transition-colors">About</Link></li>
+                  <li><Link href="/courses" className="hover:text-emerald-400 transition-colors">Courses Catalog</Link></li>
+                  <li><Link href="/select-role" className="hover:text-emerald-400 transition-colors">Role Onboarding</Link></li>
+                </ul>
+              </div>
+
+              {/* Column 3: Portals & GitHub */}
+              <div className="space-y-2">
+                <h4 className="text-xs font-semibold text-slate-200 uppercase tracking-wider">Platform</h4>
+                <ul className="space-y-1.5 text-xs">
+                  <li><Link href="/dashboard/instructor" className="hover:text-emerald-400 transition-colors">Instructor Portal</Link></li>
+                  <li><Link href="/courses" className="hover:text-emerald-400 transition-colors">Student Learning</Link></li>
+                  <li>
+                    <a 
+                      href="https://github.com/MuhammadAbdullah12-ux/CourseForge" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="hover:text-emerald-400 transition-colors flex items-center gap-1 mt-2 text-slate-300"
+                    >
+                      <Github className="size-3.5" />
+                      <span>GitHub Repository</span>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+
+            </div>
+
+            <div className="max-w-6xl mx-auto px-6 border-t border-slate-800/60 mt-8 pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
+              <p>© {new Date().getFullYear()} CourseForge Platform. All rights reserved.</p>
+              <p>Built with Next.js 16, Tailwind CSS & Supabase PostgreSQL.</p>
+            </div>
+          </footer>
         </body>
       </html>
     </ClerkProvider>

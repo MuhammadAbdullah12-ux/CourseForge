@@ -7,7 +7,7 @@ import { enrollInCourseAction } from "@/app/actions/course-actions";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, User, Calendar, BookOpen, Clock, ShieldCheck, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, User, Calendar, BookOpen, Clock, ShieldCheck, CheckCircle2, Bot, Sparkles, Award } from "lucide-react";
 
 interface PageProps {
   params: Promise<{
@@ -61,7 +61,7 @@ export default async function CourseDetailPage({ params, searchParams }: PagePro
     }
   }
 
-  // 3. Bind the current course ID to the Server Action for explicit payload serialization
+  // 3. Bind the current course ID to the Server Action
   const enrollAction = enrollInCourseAction.bind(null, course.id);
 
   // Format creation date
@@ -86,7 +86,7 @@ export default async function CourseDetailPage({ params, searchParams }: PagePro
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
         {/* Left Column: Course Main Details */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-8">
           <div className="space-y-4">
             <div className="flex gap-2">
               <Badge className="bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">
@@ -94,6 +94,10 @@ export default async function CourseDetailPage({ params, searchParams }: PagePro
               </Badge>
               <Badge variant="secondary" className="bg-slate-800 text-slate-300">
                 Beginner Friendly
+              </Badge>
+              <Badge variant="secondary" className="bg-slate-800 text-slate-300 flex items-center gap-1">
+                <Award className="size-3 text-emerald-400" />
+                <span>Certificate Included</span>
               </Badge>
             </div>
             
@@ -120,35 +124,56 @@ export default async function CourseDetailPage({ params, searchParams }: PagePro
             <p className="text-slate-300 leading-relaxed text-base">
               {course.description}
             </p>
-            <p className="text-slate-400 text-sm leading-relaxed">
-              This course is structured with inline AI tutor assistance. As you read through each lesson, 
-              you can interact with the AI assistant directly inside the workspace to ask clarifying 
-              questions, generate outline summaries, or get tested with automated mini-quizzes.
-            </p>
           </div>
 
-          {/* Mock Curriculum Outlines */}
-          <div className="space-y-4 pt-6">
+          {/* AI Tutor Interactive Feature Teaser Box */}
+          <Card className="border-emerald-500/30 bg-emerald-950/20 backdrop-blur-md">
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-emerald-500/20 rounded-lg text-emerald-400">
+                  <Bot className="size-5" />
+                </div>
+                <div>
+                  <CardTitle className="text-base text-slate-100 flex items-center gap-1.5">
+                    <span>Lesson-Scoped AI Tutor Included</span>
+                    <Sparkles className="size-3.5 text-emerald-400" />
+                  </CardTitle>
+                  <CardDescription className="text-xs text-emerald-300/80">
+                    Interactive assistance inside every lesson workspace
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-2 text-xs text-slate-300">
+              <div className="p-3 bg-slate-950/60 rounded-lg border border-slate-800 font-mono text-[11px] text-slate-300 space-y-1">
+                <p className="text-emerald-400 font-semibold">💬 Student: &quot;Can you summarize how state works in this lesson?&quot;</p>
+                <p className="text-slate-400 leading-relaxed">🤖 AI Tutor: &quot;State holds data that changes over time. When state updates, React re-renders the component to reflect new changes in the UI.&quot;</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Syllabus Curriculum Outlines */}
+          <div className="space-y-4 pt-2">
             <h2 className="text-xl font-bold text-slate-200">Syllabus Curriculum</h2>
             <div className="space-y-3 border-l-2 border-slate-800 pl-4 ml-2">
               <div className="relative pl-4">
                 <div className="absolute -left-[23px] top-1.5 size-2.5 rounded-full bg-emerald-500" />
-                <h3 className="font-semibold text-slate-200">Lesson 1: Introduction & Environment Setup</h3>
+                <h3 className="font-semibold text-slate-200 text-sm">Lesson 1: Introduction & Environment Setup</h3>
                 <p className="text-xs text-slate-400 mt-1">Understanding core prerequisites, configuring IDE systems, and folder layout blueprints.</p>
               </div>
               <div className="relative pl-4">
                 <div className="absolute -left-[23px] top-1.5 size-2.5 rounded-full bg-emerald-500" />
-                <h3 className="font-semibold text-slate-200">Lesson 2: Core Architectural Principles</h3>
+                <h3 className="font-semibold text-slate-200 text-sm">Lesson 2: Core Architectural Principles</h3>
                 <p className="text-xs text-slate-400 mt-1">Deep-dive into component design, props pipelines, and local data states flow boundaries.</p>
               </div>
               <div className="relative pl-4">
                 <div className="absolute -left-[23px] top-1.5 size-2.5 rounded-full bg-emerald-500" />
-                <h3 className="font-semibold text-slate-200">Lesson 3: Building Interactive Interfaces</h3>
+                <h3 className="font-semibold text-slate-200 text-sm">Lesson 3: Building Interactive Interfaces</h3>
                 <p className="text-xs text-slate-400 mt-1">Handling events dynamically, managing complex lists mapping keys, and layout flex grids.</p>
               </div>
               <div className="relative pl-4">
                 <div className="absolute -left-[23px] top-1.5 size-2.5 rounded-full bg-emerald-500" />
-                <h3 className="font-semibold text-slate-200">Lesson 4: Deployments & Optimization</h3>
+                <h3 className="font-semibold text-slate-200 text-sm">Lesson 4: Deployments & Optimization</h3>
                 <p className="text-xs text-slate-400 mt-1">Configuring variables, production compiler build tasks, and CD hosting edge deployments.</p>
               </div>
             </div>
@@ -157,7 +182,7 @@ export default async function CourseDetailPage({ params, searchParams }: PagePro
 
         {/* Right Column: Enrollment Card Sidebar */}
         <div className="space-y-6">
-          <Card className="border-slate-800 bg-slate-900/40 sticky top-24">
+          <Card className="border-slate-800 bg-slate-900/40 sticky top-24 backdrop-blur-md">
             <CardHeader>
               <CardTitle className="text-slate-100">Enrollment Details</CardTitle>
               <CardDescription className="text-slate-400">Join this course for free</CardDescription>
