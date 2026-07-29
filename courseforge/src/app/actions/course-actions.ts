@@ -85,7 +85,7 @@ export async function enrollInCourseAction(formData: FormData) {
     redirect("/sign-in");
   }
 
-  // Extract email from session claims if available or generate fallback
+  // Extract user role from claims if available
   const userRole = (sessionClaims?.metadata?.role as "INSTRUCTOR" | "STUDENT") || "STUDENT";
 
   try {
@@ -129,6 +129,6 @@ export async function enrollInCourseAction(formData: FormData) {
     console.error("Error executing enrollInCourseAction:", error);
   }
 
-  // 5. Redirect back to the course details page
-  redirect(`/courses/${courseId}`);
+  // 5. Redirect back to the course details page with ?enrolled=true to force client router cache refresh
+  redirect(`/courses/${courseId}?enrolled=true`);
 }

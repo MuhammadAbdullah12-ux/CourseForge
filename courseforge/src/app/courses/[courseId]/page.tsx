@@ -13,10 +13,15 @@ interface PageProps {
   params: Promise<{
     courseId: string;
   }>;
+  searchParams?: Promise<{
+    enrolled?: string;
+  }>;
 }
 
-export default async function CourseDetailPage({ params }: PageProps) {
+export default async function CourseDetailPage({ params, searchParams }: PageProps) {
   const { courseId } = await params;
+  const resolvedSearchParams = searchParams ? await searchParams : {};
+  const isEnrolledParam = resolvedSearchParams.enrolled === "true";
 
   // 1. Search our live Supabase database for the matching ID, including the instructor relation
   const course = await prisma.course.findUnique({
@@ -35,9 +40,9 @@ export default async function CourseDetailPage({ params }: PageProps) {
 
   // 2. Check server-side if the currently logged-in user is already enrolled
   const { userId } = await auth();
-  let isEnrolled = false;
+  let isEnrolled = isEnrolledParam;
 
-  if (userId) {
+  if (userId && !isEnrolled) {
     const dbUser = await prisma.user.findUnique({
       where: { clerkId: userId },
     });
