@@ -70,11 +70,9 @@ export async function createCourseAction(formData: FormData) {
 }
 
 /**
- * Server Action for Student Course Enrollment
+ * Server Action for Student Course Enrollment (Using direct courseId parameter via .bind())
  */
-export async function enrollInCourseAction(formData: FormData) {
-  const courseId = formData.get("courseId") as string;
-
+export async function enrollInCourseAction(courseId: string) {
   if (!courseId) {
     throw new Error("Course ID is required for enrollment.");
   }

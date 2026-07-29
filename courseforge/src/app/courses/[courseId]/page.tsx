@@ -61,6 +61,9 @@ export default async function CourseDetailPage({ params, searchParams }: PagePro
     }
   }
 
+  // 3. Bind the current course ID to the Server Action for explicit payload serialization
+  const enrollAction = enrollInCourseAction.bind(null, course.id);
+
   // Format creation date
   const formattedDate = new Date(course.createdAt).toLocaleDateString("en-US", {
     month: "long",
@@ -187,8 +190,7 @@ export default async function CourseDetailPage({ params, searchParams }: PagePro
                   </Button>
                 </div>
               ) : (
-                <form action={enrollInCourseAction} className="w-full">
-                  <input type="hidden" name="courseId" value={course.id} />
+                <form action={enrollAction} className="w-full">
                   <Button type="submit" variant="brand" className="w-full h-11 text-base">
                     Enroll in Course
                   </Button>
