@@ -4,6 +4,66 @@
 
 ---
 
+## 🌟 12 Core Platform Highlights
+
+| Feature | Category | Description |
+| :--- | :--- | :--- |
+| ⚡ **Next.js 16 App Router** | Engine | Powered by Turbopack compilation & React Server Components (RSC) |
+| 🤖 **Lesson AI Tutors** | AI Ecosystem | Interactive lesson-scoped AI assistant for summaries & practice quizzes |
+| 🎭 **Role-Based Workspaces** | User Experience | Dedicated Student Learning Portals & Instructor Command Centers |
+| 🛡️ **Edge RBAC Security** | Security | Next.js Edge middleware enforcing JWT session claim authorization |
+| ⚡ **Server Actions Mutations** | Data Layer | Zero-API RPC functions for course creation and student enrollments |
+| 🗄️ **Supabase PostgreSQL** | Cloud Database | Managed relational database hosted in Tokyo (AP-Northeast) region |
+| 🔌 **Prisma 7 ORM** | Data Layer | Type-safe database queries with `@prisma/adapter-pg` driver adapters |
+| 🔐 **Clerk Authentication** | Auth & Identity | OAuth, dynamic `/sign-in` & `/sign-up` routes, and custom session tokens |
+| 🔄 **Svix Webhook Sync** | Real-Time Sync | HMAC-SHA256 signature verification handler for Clerk -> Supabase user sync |
+| 🔍 **Live Search & Filter** | Interactive UI | Real-time catalog keyword search & category filter pills |
+| 🎨 **Popping Micro-Scale UI** | Animations | Popping micro-scale lifts (`hover:scale-[1.03]`) & emerald-teal color grading |
+| ☁️ **Vercel Cloud CI/CD** | Deployment | Automated GitHub Webhook cloud deployment pipeline on Edge CDN |
+
+---
+
+## 🏛️ System Architecture Diagram
+
+```mermaid
+graph TD
+    subgraph Client ["Browser & Client Layer"]
+        UI["React Server & Client Components"]
+        Search["Live Search & Category Filters"]
+        Form["Progressive Server Action Forms"]
+    end
+
+    subgraph Security ["Edge Security & Authentication"]
+        Middleware["Next.js Edge Middleware (src/middleware.ts)"]
+        ClerkAuth["Clerk Identity Provider (@clerk/nextjs)"]
+        JWTClaims["JWT Session Token Claims (role: INSTRUCTOR/STUDENT)"]
+    end
+
+    subgraph ServerLayer ["Server Execution & Logic Layer"]
+        RSC["React Server Components Rendering"]
+        ServerActions["Server Actions (course-actions.ts / user-actions.ts)"]
+        WebhookHandler["Svix Webhook Handler (/api/webhooks/clerk)"]
+    end
+
+    subgraph DatabaseLayer ["Cloud Database & ORM Layer"]
+        PrismaAdapter["Prisma 7 ORM (@prisma/adapter-pg)"]
+        PgPool["PostgreSQL Connection Pool (pg.Pool)"]
+        SupabaseDB[("Supabase Cloud PostgreSQL - Tokyo AP-Northeast")]
+    end
+
+    UI --> Middleware
+    Middleware --> ClerkAuth
+    ClerkAuth --> JWTClaims
+    JWTClaims --> RSC
+    Form --> ServerActions
+    ServerActions --> PrismaAdapter
+    WebhookHandler --> PrismaAdapter
+    PrismaAdapter --> PgPool
+    PgPool --> SupabaseDB
+```
+
+---
+
 ## 🌐 Live Production Deployments
 
 *   🏠 **Home Page:** [https://course-forge-gamma.vercel.app](https://course-forge-gamma.vercel.app)
