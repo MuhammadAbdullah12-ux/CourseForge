@@ -51,17 +51,19 @@ export default async function InstructorDashboardPage() {
           </p>
         </div>
 
-        {/* Quick Action Button */}
+        {/* Quick Action Buttons */}
         <div className="flex items-center gap-3">
           <Link href="/courses">
             <Button variant="outline" className="border-slate-700 text-slate-300 hover:text-white">
               View Public Catalog
             </Button>
           </Link>
-          <Button variant="brand" className="flex items-center gap-2">
-            <PlusCircle className="size-4" />
-            <span>Create New Course</span>
-          </Button>
+          <Link href="/dashboard/instructor/courses/new">
+            <Button variant="brand" className="flex items-center gap-2">
+              <PlusCircle className="size-4" />
+              <span>Create New Course</span>
+            </Button>
+          </Link>
         </div>
       </div>
 
@@ -139,10 +141,12 @@ export default async function InstructorDashboardPage() {
                   You are authorized as an Instructor. Start building your first course module to share knowledge with students.
                 </p>
               </div>
-              <Button variant="brand" className="flex items-center gap-2">
-                <PlusCircle className="size-4" />
-                <span>Create Your First Course</span>
-              </Button>
+              <Link href="/dashboard/instructor/courses/new">
+                <Button variant="brand" className="flex items-center gap-2">
+                  <PlusCircle className="size-4" />
+                  <span>Create Your First Course</span>
+                </Button>
+              </Link>
             </CardContent>
           </Card>
         ) : (
