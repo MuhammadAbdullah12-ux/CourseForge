@@ -1,122 +1,136 @@
-# 🚀 CourseForge
+# ⚡ CourseForge | Next-Gen AI-Assisted Learning Platform
 
-> **An AI-Assisted, Next-Generation E-Learning Platform**  
-> Built with Next.js 16 (App Router & Turbopack), Tailwind CSS, Shadcn UI, Prisma v7 ORM, Supabase PostgreSQL, and Clerk Authentication.
-
-![CourseForge Banner](https://img.shields.io/badge/Status-Active_Development-emerald?style=for-the-badge)
-![Next.js 16](https://img.shields.io/badge/Next.js-16.2-black?style=for-the-badge&logo=next.js)
-![Prisma v7](https://img.shields.io/badge/Prisma-7.9-blue?style=for-the-badge&logo=prisma)
-![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-green?style=for-the-badge&logo=supabase)
-![Clerk Auth](https://img.shields.io/badge/Clerk-Auth-6C47FF?style=for-the-badge&logo=clerk)
+> An adaptive, high-performance Learning Management System (LMS) built with **Next.js 16 App Router**, **TypeScript**, **Tailwind CSS**, **Supabase PostgreSQL**, **Prisma 7 ORM**, and **Clerk Authentication**.
 
 ---
 
-## 🌐 Live Production Demo
+## 🌐 Live Production Deployments
 
-*   **Home Page:** [https://course-forge-gamma.vercel.app](https://course-forge-gamma.vercel.app)
-*   **Courses Catalog:** [https://course-forge-gamma.vercel.app/courses](https://course-forge-gamma.vercel.app/courses)
-*   **Sign In Route:** [https://course-forge-gamma.vercel.app/sign-in](https://course-forge-gamma.vercel.app/sign-in)
+*   🏠 **Home Page:** [https://course-forge-gamma.vercel.app](https://course-forge-gamma.vercel.app)
+*   📚 **Course Catalog & Live Search:** [https://course-forge-gamma.vercel.app/courses](https://course-forge-gamma.vercel.app/courses)
+*   🎭 **Interactive Role Onboarding:** [https://course-forge-gamma.vercel.app/select-role](https://course-forge-gamma.vercel.app/select-role)
+*   👨‍🏫 **Instructor Management Dashboard:** [https://course-forge-gamma.vercel.app/dashboard/instructor](https://course-forge-gamma.vercel.app/dashboard/instructor)
 
 ---
 
-## 🏗️ Architecture & Tech Stack
+## 🚀 Key Architectural Features Completed (Weeks 1 & 2)
 
-CourseForge leverages modern React Server Components (RSC) to minimize client-side bundle size while serving dynamic database records directly from edge endpoints.
+### 🎨 1. UI/UX Design System & Micro-Animations
+*   **Popping Micro-Scale Transforms:** Interactive button lift and scaling animations (`hover:-translate-y-0.5 hover:scale-[1.03] active:scale-[0.97]`).
+*   **Emerald-Teal Gradient Color-Grading:** Hover states dynamically transition into emerald-to-teal gradients with neon ambient box-shadow glows (`hover:shadow-lg hover:shadow-emerald-500/25`).
+*   **Live Catalog Search & Filter Pills:** Real-time keyword filtering and category filter buttons (`All`, `React`, `Next.js`, `TypeScript`).
+*   **Ambient Glow Mesh Hero & Bento Grid:** Feature showcase grid highlighting AI tutors, Server Actions, RBAC workspaces, and cloud databases.
+*   **Sleek 4-Column Dark-Mode Footer:** Footer containing platform navigation links, tech stack badges, and GitHub repository links.
 
-```mermaid
-graph TD
-    Client[Browser / Client Device] --> Layout[Root Layout RSC]
-    Layout --> Clerk[Clerk Auth Session]
-    Layout --> Middleware[Edge Router Protection Middleware]
-    Layout --> Prisma[Prisma v7 Client Singleton]
-    Prisma --> Supabase[(Supabase Cloud PostgreSQL)]
+### 🎭 2. Interactive Role Selection & Onboarding
+*   **Universal Role Selection Screen (`/select-role`):** Interactive onboarding choice cards for **Student Mode** and **Instructor Mode**.
+*   **1-Click Mode Switcher Badge:** Header navigation bar displays an active mode indicator (`Instructor Mode` / `Student Mode`) with a 1-click `Switch` trigger.
+*   **Guest & Authenticated Handling:** Supports both guest visitors (directing instructors to `/sign-in` and students to `/courses`) and authenticated users (updating Clerk metadata and Supabase `User.role` in 1 click).
+
+### 🛡️ 3. Edge Authentication & Role-Based Access Control (RBAC)
+*   **Clerk Integration (`@clerk/nextjs`):** Dynamic catch-all sign-in (`/sign-in`) and sign-up (`/sign-up`) routes.
+*   **Edge Middleware Protection (`src/middleware.ts`):** Edge route matchers inspect JWT session claims (`sessionClaims.metadata.role`) to strictly protect `/dashboard/instructor(.*)` routes.
+
+### ⚡ 4. Next.js 16 Server Actions & Data Mutations
+*   **Course Creation Action (`createCourseAction`):** `"use server"` function validating inputs, checking instructor session authorization, and creating course rows in Supabase.
+*   **Student Enrollment Action (`enrollInCourseAction`):** Parameter-bound (`.bind()`) server action inserting relational rows into the `Enrollment` table.
+*   **Edge Cache Invalidation:** Calls `revalidatePath('/courses', 'layout')` to purge Vercel CDN caches, instantly updating UI enrollment state to `✓ You are Enrolled in this Course`.
+
+### 🗄️ 5. Cloud Database & Automated User Sync
+*   **Supabase PostgreSQL:** Managed cloud database hosted in Tokyo AP-Northeast region.
+*   **Prisma 7 ORM Integration:** Configured with `@prisma/adapter-pg` driver adapters and `pg.Pool` connection pooling.
+*   **Real-Time Clerk Webhooks (`/api/webhooks/clerk`):** Cryptographic Svix HMAC-SHA256 signature verification handler synchronizing `user.created`, `user.updated`, and `user.deleted` events into Supabase via `prisma.user.upsert`.
+
+---
+
+## 🗃️ Database Schema Architecture (`schema.prisma`)
+
+```prisma
+model User {
+  id          String       @id @default(cuid())
+  clerkId     String       @unique
+  email       String       @unique
+  role        UserRole     @default(STUDENT)
+  courses     Course[]     @relation("InstructorCourses")
+  enrollments Enrollment[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Course {
+  id           String       @id @default(cuid())
+  title        String
+  description  String
+  published    Boolean      @default(false)
+  instructorId String
+  instructor   User         @relation("InstructorCourses", fields: [instructorId], references: [id], onDelete: Cascade)
+  lessons      Lesson[]
+  enrollments  Enrollment[]
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+}
+
+model Lesson {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  order     Int
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Enrollment {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, courseId])
+}
+
+enum UserRole {
+  STUDENT
+  INSTRUCTOR
+}
 ```
-
-### Core Technologies
-*   **Framework:** Next.js 16 (App Router, Turbopack Compiler)
-*   **Styling:** Tailwind CSS v4, Vanilla CSS Design System, Lucide Icons
-*   **UI Components:** Shadcn UI (Card, Button, Badge)
-*   **Database & ORM:** Supabase Cloud PostgreSQL + Prisma ORM v7 (with `@prisma/adapter-pg` driver adapter)
-*   **Authentication:** Clerk Auth (JWT Cookies, Server-Side `auth()` lookup, dynamic `<UserButton />`)
-*   **Deployment:** Vercel Edge Hosting (Automated GitHub CI/CD)
-
----
-
-## ✨ Features Implemented
-
-*   [x] **Day 1–3:** Foundation, layout setup, and dark-mode glassmorphism design system.
-*   [x] **Day 4:** Responsive Landing Page with hero section, feature grid cards, and CTA buttons.
-*   [x] **Day 5–6:** Courses Catalog UI & Dynamic Routing (`/courses/[courseId]`) with 404 boundaries.
-*   [x] **Day 7:** Production compilation validation (`npm run build`).
-*   [x] **Day 8:** Supabase PostgreSQL setup + Prisma 7 Schema definition (`User`, `Course`, `Lesson`, `Enrollment`).
-*   [x] **Day 9:** Prisma Client Singleton (`lib/prisma.ts`), automated database seeding (`seed.js`), and live PostgreSQL queries replacing static mocks.
-*   [x] **Day 10:** Clerk Authentication Provider integration, dynamic catch-all login routes (`/sign-in`, `/sign-up`), and server-side navigation headers.
 
 ---
 
 ## 🛠️ Local Development Setup
 
-Follow these steps to run CourseForge locally on your computer:
-
-### 1. Prerequisites
-Ensure you have installed:
-*   [Node.js](https://nodejs.org/) (v20+ recommended)
-*   [Git](https://git-scm.com/)
-
-### 2. Clone the Repository
-```bash
-git clone https://github.com/MuhammadAbdullah12-ux/CourseForge.git
-cd CourseForge/courseforge
-```
-
-### 3. Install Dependencies
+### 1. Install Dependencies
 ```bash
 npm install
 ```
 
-### 4. Configure Environment Variables
-Create a `.env` file inside the `courseforge/` folder and add your connection keys:
-
+### 2. Configure Environment Variables
+Create `.env` inside `courseforge/`:
 ```env
-# Supabase PostgreSQL Connection Strings (Direct Port 5432)
-DATABASE_URL="postgresql://postgres.[YOUR_PROJECT]:[YOUR_PASSWORD]@aws-0-ap-northeast-1.pooler.supabase.com:5432/postgres"
-DIRECT_URL="postgresql://postgres.[YOUR_PROJECT]:[YOUR_PASSWORD]@aws-0-ap-northeast-1.pooler.supabase.com:5432/postgres"
-
-# Clerk Authentication Keys
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
-CLERK_SECRET_KEY=sk_test_...
-
-# Clerk Redirect Routes
+DATABASE_URL=postgresql://postgres.eeeeftbbcbblxsqlcsrq:pzYpF3NvhvmmQmbW@aws-0-ap-northeast-1.pooler.supabase.com:5432/postgres
+DIRECT_URL=postgresql://postgres.eeeeftbbcbblxsqlcsrq:pzYpF3NvhvmmQmbW@aws-0-ap-northeast-1.pooler.supabase.com:5432/postgres
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_ZXZvbHZpbmctc2hhcmstOC5jbGVyay5hY2NvdW50cy5kZXYk
+CLERK_SECRET_KEY=sk_test_i3Vp89F1KVDzem3AjF7K2ceu0yaxygxqSmTRp8cpGQ
 NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
 NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
+WEBHOOK_SECRET=whsec_placeholder
 ```
 
-### 5. Generate Prisma Client & Seed Database
+### 3. Push Prisma Database Schema & Seed Data
 ```bash
-# Compile local Prisma Client engine
-npx prisma generate
-
-# (Optional) Run automated database seeding script
+npx prisma db push
 node prisma/seed.js
 ```
 
-### 6. Start Development Server
+### 4. Run Development Server
 ```bash
 npm run dev
 ```
-Open **[http://localhost:3000](http://localhost:3000)** in your browser!
+Open **`http://localhost:3000`** in your browser!
 
 ---
 
-## 📝 Learning Roadmap & Next Milestones
-
-- [ ] **Day 11:** Role-Based Middleware Routing (Instructor vs. Student route protection)
-- [ ] **Day 12:** Server Actions Mutations (Creating & updating courses via server actions)
-- [ ] **Day 13:** User Synchronization Webhooks (Syncing Clerk users to Supabase database)
-- [ ] **Day 14:** Student Enrollment Flow & Final Review
-
----
-
-## 👤 Author & Maintainer
-
-Developed with ❤️ as part of the **CourseForge Full-Stack Engineering Track**.
+© 2026 CourseForge Platform. Built with Next.js 16, Supabase PostgreSQL & Prisma 7.
