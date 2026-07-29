@@ -1,6 +1,27 @@
-# ⚡ CourseForge | Next-Gen AI-Assisted Learning Platform
+# 🚀 CourseForge
 
-> An adaptive, high-performance Learning Management System (LMS) built with **Next.js 16 App Router**, **TypeScript**, **Tailwind CSS**, **Supabase PostgreSQL**, **Prisma 7 ORM**, and **Clerk Authentication**.
+> **An AI-Assisted, Next-Generation E-Learning Platform**  
+> Built with **Next.js 16** (App Router & Turbopack), **Tailwind CSS**, **Shadcn UI**, **Prisma v7 ORM**, **Supabase Cloud PostgreSQL**, and **Clerk Authentication**.
+
+<p align="left">
+  <a href="https://course-forge-gamma.vercel.app"><img src="https://img.shields.io/badge/STATUS-ACTIVE_DEVELOPMENT-brightgreen?style=for-the-badge&logo=github" alt="Status" /></a>
+  <a href="https://nextjs.org"><img src="https://img.shields.io/badge/NEXT.JS-16.2-000000?style=for-the-badge&logo=next.js" alt="Next.js" /></a>
+  <a href="https://www.prisma.io"><img src="https://img.shields.io/badge/PRISMA-v7.9-2D3748?style=for-the-badge&logo=prisma" alt="Prisma" /></a>
+  <a href="https://supabase.com"><img src="https://img.shields.io/badge/SUPABASE-POSTGRESQL-3ECF8E?style=for-the-badge&logo=supabase" alt="Supabase" /></a>
+  <a href="https://clerk.com"><img src="https://img.shields.io/badge/CLERK-AUTH-6C47FF?style=for-the-badge&logo=clerk" alt="Clerk" /></a>
+  <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/TYPESCRIPT-5.0-3178C6?style=for-the-badge&logo=typescript" alt="TypeScript" /></a>
+  <a href="https://tailwindcss.com"><img src="https://img.shields.io/badge/TAILWIND-CSS-06B6D4?style=for-the-badge&logo=tailwindcss" alt="Tailwind" /></a>
+  <a href="https://vercel.com"><img src="https://img.shields.io/badge/VERCEL-DEPLOYED-000000?style=for-the-badge&logo=vercel" alt="Vercel" /></a>
+</p>
+
+---
+
+## 🌐 Live Production Links
+
+*   🏠 **Home Page:** [https://course-forge-gamma.vercel.app](https://course-forge-gamma.vercel.app)
+*   📚 **Course Catalog & Live Search:** [https://course-forge-gamma.vercel.app/courses](https://course-forge-gamma.vercel.app/courses)
+*   🎭 **Interactive Role Onboarding:** [https://course-forge-gamma.vercel.app/select-role](https://course-forge-gamma.vercel.app/select-role)
+*   👨‍🏫 **Instructor Management Dashboard:** [https://course-forge-gamma.vercel.app/dashboard/instructor](https://course-forge-gamma.vercel.app/dashboard/instructor)
 
 ---
 
@@ -61,15 +82,6 @@ graph TD
     PrismaAdapter --> PgPool
     PgPool --> SupabaseDB
 ```
-
----
-
-## 🌐 Live Production Deployments
-
-*   🏠 **Home Page:** [https://course-forge-gamma.vercel.app](https://course-forge-gamma.vercel.app)
-*   📚 **Course Catalog & Live Search:** [https://course-forge-gamma.vercel.app/courses](https://course-forge-gamma.vercel.app/courses)
-*   🎭 **Interactive Role Onboarding:** [https://course-forge-gamma.vercel.app/select-role](https://course-forge-gamma.vercel.app/select-role)
-*   👨‍🏫 **Instructor Management Dashboard:** [https://course-forge-gamma.vercel.app/dashboard/instructor](https://course-forge-gamma.vercel.app/dashboard/instructor)
 
 ---
 
