@@ -7,6 +7,7 @@ const isPublicRoute = createRouteMatcher([
   '/courses(.*)',          // Courses catalog and dynamic detail subroutes
   '/sign-in(.*)',          // Sign-in screens
   '/sign-up(.*)',          // Sign-up screens
+  '/select-role(.*)',      // Role selection onboarding page
 ]);
 
 // 2. Define routes reserved strictly for INSTRUCTOR users
@@ -28,7 +29,7 @@ export default clerkMiddleware(async (auth, request) => {
     // Extract custom role claim from session token
     const userRole = sessionClaims?.metadata?.role;
 
-    // If logged-in user is NOT an INSTRUCTOR (e.g. STUDENT), redirect to catalog
+    // If logged-in user is NOT an INSTRUCTOR (e.g. STUDENT), redirect to role selection or courses
     if (userRole !== "INSTRUCTOR") {
       const catalogUrl = new URL("/courses", request.url);
       return Response.redirect(catalogUrl);
