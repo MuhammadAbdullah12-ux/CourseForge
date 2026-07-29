@@ -62,8 +62,8 @@ export async function createCourseAction(formData: FormData) {
   });
 
   // 5. Purge Next.js static/dynamic route cache so new courses appear live immediately
-  revalidatePath("/courses");
-  revalidatePath("/dashboard/instructor");
+  revalidatePath("/courses", "layout");
+  revalidatePath("/dashboard/instructor", "layout");
 
   // 6. Redirect back to the Instructor Dashboard
   redirect("/dashboard/instructor");
@@ -80,53 +80,55 @@ export async function enrollInCourseAction(formData: FormData) {
   }
 
   // 1. Authenticate the student user
-  const { userId } = await auth();
+  const { userId, sessionClaims } = await auth();
   if (!userId) {
     redirect("/sign-in");
   }
 
-  // 2. Ensure User record exists in Supabase PostgreSQL
-  let dbUser = await prisma.user.findUnique({
-    where: { clerkId: userId },
-  });
+  // Extract email from session claims if available or generate fallback
+  const userRole = (sessionClaims?.metadata?.role as "INSTRUCTOR" | "STUDENT") || "STUDENT";
 
-  if (!dbUser) {
-    dbUser = await prisma.user.upsert({
+  try {
+    // 2. Ensure User record exists in Supabase PostgreSQL
+    let dbUser = await prisma.user.findUnique({
       where: { clerkId: userId },
+    });
+
+    if (!dbUser) {
+      dbUser = await prisma.user.upsert({
+        where: { clerkId: userId },
+        update: {},
+        create: {
+          clerkId: userId,
+          email: `user_${userId.slice(-6)}@courseforge.com`,
+          role: userRole,
+        },
+      });
+    }
+
+    // 3. Create or update enrollment row in Supabase using idempotent upsert
+    await prisma.enrollment.upsert({
+      where: {
+        userId_courseId: {
+          userId: dbUser.id,
+          courseId: courseId,
+        },
+      },
       update: {},
       create: {
-        clerkId: userId,
-        email: `student_${userId.slice(-6)}@courseforge.com`,
-        role: "STUDENT",
-      },
-    });
-  }
-
-  // 3. Check if enrollment already exists to prevent duplicate rows
-  const existingEnrollment = await prisma.enrollment.findUnique({
-    where: {
-      userId_courseId: {
-        userId: dbUser.id,
-        courseId: courseId,
-      },
-    },
-  });
-
-  // 4. Create new enrollment row in Supabase if not previously enrolled
-  if (!existingEnrollment) {
-    await prisma.enrollment.create({
-      data: {
         userId: dbUser.id,
         courseId: courseId,
       },
     });
+
+    // 4. Purge stale route caches across layouts & dynamic pages on Vercel
+    revalidatePath("/courses", "layout");
+    revalidatePath(`/courses/${courseId}`, "page");
+    revalidatePath("/dashboard/instructor", "layout");
+  } catch (error) {
+    console.error("Error executing enrollInCourseAction:", error);
   }
 
-  // 5. Purge stale route caches so the UI reflects enrollment instantly
-  revalidatePath("/courses");
-  revalidatePath(`/courses/${courseId}`);
-  revalidatePath("/dashboard/instructor");
-
-  // 6. Redirect back to the course details page
+  // 5. Redirect back to the course details page
   redirect(`/courses/${courseId}`);
 }
