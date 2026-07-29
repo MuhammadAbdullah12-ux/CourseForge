@@ -4,10 +4,11 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { enrollInCourseAction } from "@/app/actions/course-actions";
+import { AITutorWidget } from "@/components/ai-tutor-widget";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, User, Calendar, BookOpen, Clock, ShieldCheck, CheckCircle2, Bot, Sparkles, Award } from "lucide-react";
+import { ArrowLeft, User, Calendar, BookOpen, Clock, ShieldCheck, CheckCircle2, Award } from "lucide-react";
 
 interface PageProps {
   params: Promise<{
@@ -23,7 +24,7 @@ export default async function CourseDetailPage({ params, searchParams }: PagePro
   const resolvedSearchParams = searchParams ? await searchParams : {};
   const isEnrolledParam = resolvedSearchParams.enrolled === "true";
 
-  // 1. Search our live Supabase database for the matching ID, including the instructor relation
+  // 1. Fetch course from Supabase database, including instructor
   const course = await prisma.course.findUnique({
     where: {
       id: courseId,
@@ -33,12 +34,11 @@ export default async function CourseDetailPage({ params, searchParams }: PagePro
     },
   });
 
-  // If the course isn't found, trigger Next.js's native 404 handler
   if (!course) {
     notFound();
   }
 
-  // 2. Check server-side if the currently logged-in user is already enrolled
+  // 2. Check enrollment status
   const { userId } = await auth();
   let isEnrolled = isEnrolledParam;
 
@@ -61,16 +61,14 @@ export default async function CourseDetailPage({ params, searchParams }: PagePro
     }
   }
 
-  // 3. Bind the current course ID to the Server Action
+  // Bind course ID to Server Action
   const enrollAction = enrollInCourseAction.bind(null, course.id);
 
-  // Format creation date
   const formattedDate = new Date(course.createdAt).toLocaleDateString("en-US", {
     month: "long",
     year: "numeric",
   });
 
-  // Truncate email to display as user name
   const instructorName = course.instructor.email.split("@")[0];
 
   return (
@@ -85,7 +83,7 @@ export default async function CourseDetailPage({ params, searchParams }: PagePro
       {/* Main Grid: 2/3 Content on Left, 1/3 Sidebar Card on Right */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        {/* Left Column: Course Main Details */}
+        {/* Left Column: Course Main Details & Live AI Tutor */}
         <div className="lg:col-span-2 space-y-8">
           <div className="space-y-4">
             <div className="flex gap-2">
@@ -126,31 +124,8 @@ export default async function CourseDetailPage({ params, searchParams }: PagePro
             </p>
           </div>
 
-          {/* AI Tutor Interactive Feature Teaser Box */}
-          <Card className="border-emerald-500/30 bg-emerald-950/20 backdrop-blur-md">
-            <CardHeader className="pb-3">
-              <div className="flex items-center gap-2">
-                <div className="p-2 bg-emerald-500/20 rounded-lg text-emerald-400">
-                  <Bot className="size-5" />
-                </div>
-                <div>
-                  <CardTitle className="text-base text-slate-100 flex items-center gap-1.5">
-                    <span>Lesson-Scoped AI Tutor Included</span>
-                    <Sparkles className="size-3.5 text-emerald-400" />
-                  </CardTitle>
-                  <CardDescription className="text-xs text-emerald-300/80">
-                    Interactive assistance inside every lesson workspace
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-2 text-xs text-slate-300">
-              <div className="p-3 bg-slate-950/60 rounded-lg border border-slate-800 font-mono text-[11px] text-slate-300 space-y-1">
-                <p className="text-emerald-400 font-semibold">💬 Student: &quot;Can you summarize how state works in this lesson?&quot;</p>
-                <p className="text-slate-400 leading-relaxed">🤖 AI Tutor: &quot;State holds data that changes over time. When state updates, React re-renders the component to reflect new changes in the UI.&quot;</p>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Live AI Tutor Widget Component */}
+          <AITutorWidget lessonTitle={course.title} />
 
           {/* Syllabus Curriculum Outlines */}
           <div className="space-y-4 pt-2">
@@ -202,7 +177,6 @@ export default async function CourseDetailPage({ params, searchParams }: PagePro
               </div>
             </CardContent>
             
-            {/* Dynamic Enrollment Action Footer */}
             <CardFooter className="flex flex-col gap-3">
               {isEnrolled ? (
                 <div className="w-full space-y-3">
