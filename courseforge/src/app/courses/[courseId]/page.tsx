@@ -2,10 +2,12 @@ import React from 'react';
 import Link from 'next/link';
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { auth } from "@clerk/nextjs/server";
+import { enrollInCourseAction } from "@/app/actions/course-actions";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, User, Calendar, BookOpen, Clock, ShieldCheck } from "lucide-react";
+import { ArrowLeft, User, Calendar, BookOpen, Clock, ShieldCheck, CheckCircle2 } from "lucide-react";
 
 interface PageProps {
   params: Promise<{
@@ -16,7 +18,7 @@ interface PageProps {
 export default async function CourseDetailPage({ params }: PageProps) {
   const { courseId } = await params;
 
-  // Search our live Supabase database for the matching ID, including the instructor relation
+  // 1. Search our live Supabase database for the matching ID, including the instructor relation
   const course = await prisma.course.findUnique({
     where: {
       id: courseId,
@@ -29,6 +31,29 @@ export default async function CourseDetailPage({ params }: PageProps) {
   // If the course isn't found, trigger Next.js's native 404 handler
   if (!course) {
     notFound();
+  }
+
+  // 2. Check server-side if the currently logged-in user is already enrolled
+  const { userId } = await auth();
+  let isEnrolled = false;
+
+  if (userId) {
+    const dbUser = await prisma.user.findUnique({
+      where: { clerkId: userId },
+    });
+
+    if (dbUser) {
+      const enrollment = await prisma.enrollment.findUnique({
+        where: {
+          userId_courseId: {
+            userId: dbUser.id,
+            courseId: course.id,
+          },
+        },
+      });
+
+      isEnrolled = !!enrollment;
+    }
   }
 
   // Format creation date
@@ -143,12 +168,31 @@ export default async function CourseDetailPage({ params }: PageProps) {
                 <span>Includes: <strong>Interactive AI Tutor</strong></span>
               </div>
             </CardContent>
+            
+            {/* Dynamic Enrollment Action Footer */}
             <CardFooter className="flex flex-col gap-3">
-              <Button variant="brand" className="w-full h-11 text-base">
-                Enroll in Course
-              </Button>
+              {isEnrolled ? (
+                <div className="w-full space-y-3">
+                  <div className="flex items-center justify-center gap-2 p-2.5 rounded-lg bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-sm font-semibold">
+                    <CheckCircle2 className="size-4 shrink-0" />
+                    <span>You are Enrolled in this Course</span>
+                  </div>
+                  <Button variant="outline" className="w-full border-slate-700 text-slate-200 hover:text-white">
+                    Access Course Content
+                  </Button>
+                </div>
+              ) : (
+                <form action={enrollInCourseAction} className="w-full">
+                  <input type="hidden" name="courseId" value={course.id} />
+                  <Button type="submit" variant="brand" className="w-full h-11 text-base">
+                    Enroll in Course
+                  </Button>
+                </form>
+              )}
               <span className="text-center text-[11px] text-slate-500">
-                Clicking enroll adds this course to your student dashboard (Backend CRUD dynamic database flows starting in Week 2).
+                {isEnrolled
+                  ? "Your enrollment is active and saved in Supabase database."
+                  : "Clicking enroll saves a relational enrollment record in Supabase PostgreSQL."}
               </span>
             </CardFooter>
           </Card>

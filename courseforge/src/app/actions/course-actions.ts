@@ -68,3 +68,65 @@ export async function createCourseAction(formData: FormData) {
   // 6. Redirect back to the Instructor Dashboard
   redirect("/dashboard/instructor");
 }
+
+/**
+ * Server Action for Student Course Enrollment
+ */
+export async function enrollInCourseAction(formData: FormData) {
+  const courseId = formData.get("courseId") as string;
+
+  if (!courseId) {
+    throw new Error("Course ID is required for enrollment.");
+  }
+
+  // 1. Authenticate the student user
+  const { userId } = await auth();
+  if (!userId) {
+    redirect("/sign-in");
+  }
+
+  // 2. Ensure User record exists in Supabase PostgreSQL
+  let dbUser = await prisma.user.findUnique({
+    where: { clerkId: userId },
+  });
+
+  if (!dbUser) {
+    dbUser = await prisma.user.upsert({
+      where: { clerkId: userId },
+      update: {},
+      create: {
+        clerkId: userId,
+        email: `student_${userId.slice(-6)}@courseforge.com`,
+        role: "STUDENT",
+      },
+    });
+  }
+
+  // 3. Check if enrollment already exists to prevent duplicate rows
+  const existingEnrollment = await prisma.enrollment.findUnique({
+    where: {
+      userId_courseId: {
+        userId: dbUser.id,
+        courseId: courseId,
+      },
+    },
+  });
+
+  // 4. Create new enrollment row in Supabase if not previously enrolled
+  if (!existingEnrollment) {
+    await prisma.enrollment.create({
+      data: {
+        userId: dbUser.id,
+        courseId: courseId,
+      },
+    });
+  }
+
+  // 5. Purge stale route caches so the UI reflects enrollment instantly
+  revalidatePath("/courses");
+  revalidatePath(`/courses/${courseId}`);
+  revalidatePath("/dashboard/instructor");
+
+  // 6. Redirect back to the course details page
+  redirect(`/courses/${courseId}`);
+}
