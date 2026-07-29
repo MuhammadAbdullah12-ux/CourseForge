@@ -41,34 +41,34 @@ export default async function RootLayout({
       >
         <body className="min-h-full bg-slate-950 text-slate-100 flex flex-col selection:bg-emerald-500/30 selection:text-emerald-300">
           {/* Shared Header Navigation Bar */}
-          <header className="border-b border-slate-800/80 bg-slate-950/70 backdrop-blur-xl sticky top-0 z-50 transition-all">
+          <header className="border-b border-slate-800/80 bg-slate-950/75 backdrop-blur-xl sticky top-0 z-50 transition-all">
             <nav className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
               
               {/* Logo / Brand Name */}
-              <Link href="/" className="font-extrabold text-xl text-emerald-400 tracking-tight hover:opacity-90 transition-opacity flex items-center gap-2">
-                <span className="bg-emerald-500/20 text-emerald-400 p-1.5 rounded-lg text-xs border border-emerald-500/30">
+              <Link href="/" className="font-extrabold text-xl text-emerald-400 tracking-tight hover:scale-105 hover:opacity-95 transition-all flex items-center gap-2">
+                <span className="bg-emerald-500/20 text-emerald-400 p-1.5 rounded-xl text-xs border border-emerald-500/30 shadow-inner">
                   CF
                 </span>
                 <span>CourseForge</span>
               </Link>
               
-              {/* Navigation Links with Hover Animations */}
+              {/* Navigation Links with Popping Animations & Color Grading */}
               <div className="flex gap-2 sm:gap-3 items-center">
                 <Link 
                   href="/" 
-                  className="px-3 py-1.5 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/60 transition-all duration-200"
+                  className="px-3.5 py-1.5 rounded-xl text-sm font-medium text-slate-300 hover:text-slate-950 hover:bg-gradient-to-r hover:from-emerald-400 hover:to-teal-300 hover:font-bold hover:scale-105 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/25 transition-all duration-200 ease-out"
                 >
                   Home
                 </Link>
                 <Link 
                   href="/about" 
-                  className="px-3 py-1.5 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/60 transition-all duration-200"
+                  className="px-3.5 py-1.5 rounded-xl text-sm font-medium text-slate-300 hover:text-slate-950 hover:bg-gradient-to-r hover:from-emerald-400 hover:to-teal-300 hover:font-bold hover:scale-105 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/25 transition-all duration-200 ease-out"
                 >
                   About
                 </Link>
                 <Link 
                   href="/courses" 
-                  className="px-3 py-1.5 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/60 transition-all duration-200"
+                  className="px-3.5 py-1.5 rounded-xl text-sm font-medium text-slate-300 hover:text-slate-950 hover:bg-gradient-to-r hover:from-emerald-400 hover:to-teal-300 hover:font-bold hover:scale-105 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/25 transition-all duration-200 ease-out"
                 >
                   Courses
                 </Link>
@@ -77,17 +77,17 @@ export default async function RootLayout({
                 {userId && userRole === "INSTRUCTOR" && (
                   <Link 
                     href="/dashboard/instructor" 
-                    className="px-3 py-1.5 rounded-lg text-sm font-medium text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 transition-all duration-200"
+                    className="px-3.5 py-1.5 rounded-xl text-sm font-bold text-emerald-400 hover:text-slate-950 hover:bg-gradient-to-r hover:from-emerald-400 hover:to-teal-300 hover:scale-105 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/25 transition-all duration-200 ease-out"
                   >
                     Dashboard
                   </Link>
                 )}
 
-                {/* Render Permanent Select Role Button */}
+                {/* Render Permanent Select Role Button with Color-Graded Hover Glow */}
                 <Link 
                   href="/select-role" 
                   title="Choose or switch between Student and Instructor access modes"
-                  className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 hover:bg-emerald-500/20 hover:border-emerald-500/50 transition-all duration-200 flex items-center gap-1.5"
+                  className="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-gradient-to-r hover:from-emerald-500 hover:to-teal-400 hover:text-slate-950 hover:border-emerald-300 hover:scale-105 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/30 transition-all duration-200 ease-out flex items-center gap-1.5"
                 >
                   <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   <span>
@@ -105,19 +105,19 @@ export default async function RootLayout({
                   <div className="flex items-center gap-2 ml-2">
                     <Link 
                       href="/sign-in" 
-                      className="px-3.5 py-1.5 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/60 transition-all duration-200"
+                      className="px-3.5 py-1.5 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 hover:scale-105 hover:-translate-y-0.5 transition-all duration-200 ease-out"
                     >
                       Sign In
                     </Link>
                     <Link 
                       href="/sign-up" 
-                      className="px-3.5 py-1.5 rounded-lg text-sm font-medium bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/25 transition-all duration-200"
+                      className="px-4 py-1.5 rounded-xl text-sm font-extrabold bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 hover:from-emerald-400 hover:to-teal-300 hover:scale-105 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/30 transition-all duration-200 ease-out"
                     >
                       Sign Up
                     </Link>
                   </div>
                 ) : (
-                  <div className="ml-2 flex items-center">
+                  <div className="ml-2 flex items-center hover:scale-105 transition-transform">
                     <UserButton />
                   </div>
                 )}
