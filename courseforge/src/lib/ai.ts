@@ -1,11 +1,13 @@
 /**
- * Reusable AI Tutor Response Generator
+ * Reusable AI Tutor Response Generator with RAG Context Injection
  * @param prompt - The student's question or prompt
  * @param lessonTitle - Optional lesson context for scoped tutor assistance
+ * @param lessonContent - Optional full reading material text of the lesson
  */
 export async function generateAITutorResponse(
   prompt: string,
-  lessonTitle?: string
+  lessonTitle?: string,
+  lessonContent?: string
 ): Promise<string> {
   const currentApiKey = process.env.GEMINI_API_KEY;
 
@@ -17,14 +19,19 @@ export async function generateAITutorResponse(
     ? `Lesson Topic Context: "${lessonTitle}".`
     : "General Full-Stack Web Development Track.";
 
+  const contentBlock = lessonContent
+    ? `\n\nOfficial Lesson Reading Material Provided To Student:\n\"\"\"\n${lessonContent.slice(0, 3000)}\n\"\"\"\n`
+    : "";
+
   const systemInstruction = `You are CourseForge AI Tutor, a world-class coding tutor and mentor on the CourseForge LMS platform.
-Your mission is to provide clear, encouraging, and highly accurate explanations to students.
+Your mission is to provide clear, encouraging, and highly accurate explanations to students based on the lesson context and reading material provided below.
+Answer questions accurately by referring to the specific code examples, key concepts, and summaries in the reading material whenever applicable.
 Keep responses structured using clean GitHub Markdown with code snippets, bold key terms, and bullet points.
-${contextHeader}`;
+${contextHeader}${contentBlock}`;
 
   const fullPrompt = `${systemInstruction}\n\nStudent Question: ${prompt}`;
 
-  // 1. First, fetch available models for this specific API key directly from Google
+  // 1. Fetch available models for this specific API key directly from Google
   try {
     const listRes = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models?key=${currentApiKey}`
@@ -35,16 +42,14 @@ ${contextHeader}`;
       return `⚠️ **Google API Key Status:** ${listData.error.message}`;
     }
 
-    // Extract models supporting generateContent
     const availableModels: string[] = (listData.models || [])
       .filter((m: any) => m.supportedGenerationMethods?.includes("generateContent"))
       .map((m: any) => m.name.replace("models/", ""));
 
     if (availableModels.length === 0) {
-      return `⚠️ **Google API Notice:** No generateContent models available for this key. Available models: ${JSON.stringify(listData.models?.map((m: any) => m.name))}`;
+      return `⚠️ **Google API Notice:** No generateContent models available for this key.`;
     }
 
-    // Try available models in order
     for (const modelName of availableModels) {
       try {
         const postRes = await fetch(

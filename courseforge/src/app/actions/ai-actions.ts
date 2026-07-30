@@ -6,6 +6,7 @@ import { generateAITutorResponse } from "@/lib/ai";
 export async function askAITutorAction(formData: FormData) {
   const prompt = formData.get("prompt") as string;
   const lessonTitle = (formData.get("lessonTitle") as string) || undefined;
+  const lessonContent = (formData.get("lessonContent") as string) || undefined;
 
   if (!prompt || prompt.trim().length === 0) {
     return {
@@ -23,9 +24,13 @@ export async function askAITutorAction(formData: FormData) {
     };
   }
 
-  // 2. Generate response using Gemini AI helper
+  // 2. Generate response using Gemini AI helper with lesson content context
   try {
-    const answer = await generateAITutorResponse(prompt.trim(), lessonTitle);
+    const answer = await generateAITutorResponse(
+      prompt.trim(),
+      lessonTitle,
+      lessonContent
+    );
     return {
       success: true,
       answer,

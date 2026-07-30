@@ -8,7 +8,7 @@ import { AITutorWidget } from "@/components/ai-tutor-widget";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, User, Calendar, BookOpen, Clock, ShieldCheck, CheckCircle2, Award } from "lucide-react";
+import { ArrowLeft, User, Calendar, BookOpen, Clock, ShieldCheck, CheckCircle2, Award, PlayCircle } from "lucide-react";
 
 interface PageProps {
   params: Promise<{
@@ -24,13 +24,18 @@ export default async function CourseDetailPage({ params, searchParams }: PagePro
   const resolvedSearchParams = searchParams ? await searchParams : {};
   const isEnrolledParam = resolvedSearchParams.enrolled === "true";
 
-  // 1. Fetch course from Supabase database, including instructor
+  // 1. Fetch course from Supabase database, including instructor and ordered lessons
   const course = await prisma.course.findUnique({
     where: {
       id: courseId,
     },
     include: {
       instructor: true,
+      lessons: {
+        orderBy: {
+          order: "asc",
+        },
+      },
     },
   });
 
@@ -70,6 +75,7 @@ export default async function CourseDetailPage({ params, searchParams }: PagePro
   });
 
   const instructorName = course.instructor.email.split("@")[0];
+  const firstLesson = course.lessons[0];
 
   return (
     <main className="max-w-5xl mx-auto px-6 py-10 md:py-16 font-sans text-slate-200">
@@ -127,30 +133,26 @@ export default async function CourseDetailPage({ params, searchParams }: PagePro
           {/* Live AI Tutor Widget Component */}
           <AITutorWidget lessonTitle={course.title} />
 
-          {/* Syllabus Curriculum Outlines */}
+          {/* Syllabus Curriculum Outlines linked to real relational lesson routes */}
           <div className="space-y-4 pt-2">
-            <h2 className="text-xl font-bold text-slate-200">Syllabus Curriculum</h2>
+            <h2 className="text-xl font-bold text-slate-200">Syllabus Curriculum ({course.lessons.length} Modules)</h2>
             <div className="space-y-3 border-l-2 border-slate-800 pl-4 ml-2">
-              <div className="relative pl-4">
-                <div className="absolute -left-[23px] top-1.5 size-2.5 rounded-full bg-emerald-500" />
-                <h3 className="font-semibold text-slate-200 text-sm">Lesson 1: Introduction & Environment Setup</h3>
-                <p className="text-xs text-slate-400 mt-1">Understanding core prerequisites, configuring IDE systems, and folder layout blueprints.</p>
-              </div>
-              <div className="relative pl-4">
-                <div className="absolute -left-[23px] top-1.5 size-2.5 rounded-full bg-emerald-500" />
-                <h3 className="font-semibold text-slate-200 text-sm">Lesson 2: Core Architectural Principles</h3>
-                <p className="text-xs text-slate-400 mt-1">Deep-dive into component design, props pipelines, and local data states flow boundaries.</p>
-              </div>
-              <div className="relative pl-4">
-                <div className="absolute -left-[23px] top-1.5 size-2.5 rounded-full bg-emerald-500" />
-                <h3 className="font-semibold text-slate-200 text-sm">Lesson 3: Building Interactive Interfaces</h3>
-                <p className="text-xs text-slate-400 mt-1">Handling events dynamically, managing complex lists mapping keys, and layout flex grids.</p>
-              </div>
-              <div className="relative pl-4">
-                <div className="absolute -left-[23px] top-1.5 size-2.5 rounded-full bg-emerald-500" />
-                <h3 className="font-semibold text-slate-200 text-sm">Lesson 4: Deployments & Optimization</h3>
-                <p className="text-xs text-slate-400 mt-1">Configuring variables, production compiler build tasks, and CD hosting edge deployments.</p>
-              </div>
+              {course.lessons.map((lesson) => (
+                <Link key={lesson.id} href={`/courses/${course.id}/lessons/${lesson.id}`} className="block group">
+                  <div className="relative pl-4 p-3 rounded-xl bg-slate-900/40 border border-slate-800 hover:border-emerald-500/40 hover:bg-slate-900/70 transition-all duration-200">
+                    <div className="absolute -left-[23px] top-4 size-2.5 rounded-full bg-emerald-500 group-hover:scale-125 transition-transform" />
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-semibold text-slate-200 text-sm group-hover:text-emerald-400 transition-colors flex items-center gap-2">
+                        <span>{lesson.title}</span>
+                      </h3>
+                      <PlayCircle className="size-4 text-slate-500 group-hover:text-emerald-400 transition-colors" />
+                    </div>
+                    <p className="text-xs text-slate-400 mt-1 line-clamp-2">
+                      {lesson.content.slice(0, 120)}...
+                    </p>
+                  </div>
+                </Link>
+              ))}
             </div>
           </div>
         </div>
@@ -169,7 +171,7 @@ export default async function CourseDetailPage({ params, searchParams }: PagePro
               </div>
               <div className="flex items-center gap-2.5 text-sm text-slate-300">
                 <BookOpen className="size-4 text-emerald-400" />
-                <span>Lessons: <strong>4 Modules</strong></span>
+                <span>Lessons: <strong>{course.lessons.length} Modules</strong></span>
               </div>
               <div className="flex items-center gap-2.5 text-sm text-slate-300">
                 <ShieldCheck className="size-4 text-emerald-400" />
@@ -184,9 +186,14 @@ export default async function CourseDetailPage({ params, searchParams }: PagePro
                     <CheckCircle2 className="size-4 shrink-0" />
                     <span>You are Enrolled in this Course</span>
                   </div>
-                  <Button variant="outline" className="w-full border-slate-700 text-slate-200 hover:text-white">
-                    Access Course Content
-                  </Button>
+                  {firstLesson && (
+                    <Link href={`/courses/${course.id}/lessons/${firstLesson.id}`} className="w-full">
+                      <Button variant="brand" className="w-full h-11 text-base flex items-center justify-center gap-2">
+                        <PlayCircle className="size-5" />
+                        <span>Start Lesson 1</span>
+                      </Button>
+                    </Link>
+                  )}
                 </div>
               ) : (
                 <form action={enrollAction} className="w-full">
