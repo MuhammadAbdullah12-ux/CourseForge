@@ -1,41 +1,87 @@
 import React from "react";
 import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
+import { prisma } from "@/lib/prisma";
 import { setUserRoleAction } from "@/app/actions/user-actions";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { GraduationCap, Briefcase, ShieldCheck, Sparkles, CheckCircle2, ArrowRight } from "lucide-react";
+import { GraduationCap, Briefcase, ShieldCheck, Sparkles, CheckCircle2, ArrowRight, Lock, Check } from "lucide-react";
 
 export default async function SelectRolePage() {
-  // Allow viewing the 3 Role Mode cards FIRST without blocking sign-in popups!
   const { userId } = await auth();
 
+  // Determine current active database role for the logged-in user
+  let currentRole = "UNAUTHENTICATED";
+  if (userId) {
+    const dbUser = await prisma.user.findUnique({
+      where: { clerkId: userId },
+      select: { role: true },
+    });
+    if (dbUser?.role) {
+      currentRole = dbUser.role;
+    }
+  }
+
+  const isAdmin = currentRole === "ADMIN";
+  const isInstructor = currentRole === "INSTRUCTOR";
+  const isStudent = currentRole === "STUDENT";
+
+  // Server Action Handlers with Strict Role Permission Matrix
   const handleStudentSelect = async () => {
     "use server";
-    const { userId: currentUserId } = await auth();
-    if (!currentUserId) {
+    const { userId: activeUserId } = await auth();
+    if (!activeUserId) {
       redirect("/sign-in?redirect_url=/dashboard/student");
     }
     await setUserRoleAction("STUDENT");
+    redirect("/dashboard/student");
   };
 
   const handleInstructorSelect = async () => {
     "use server";
-    const { userId: currentUserId } = await auth();
-    if (!currentUserId) {
+    const { userId: activeUserId } = await auth();
+
+    if (!activeUserId) {
       redirect("/sign-in?redirect_url=/dashboard/instructor");
     }
-    await setUserRoleAction("INSTRUCTOR");
+
+    const userInDb = await prisma.user.findUnique({
+      where: { clerkId: activeUserId },
+      select: { role: true },
+    });
+
+    // Admin or Instructor can access Instructor Portal directly
+    if (userInDb?.role === "ADMIN" || userInDb?.role === "INSTRUCTOR") {
+      await setUserRoleAction("INSTRUCTOR");
+      redirect("/dashboard/instructor");
+    } else {
+      // Student attempting to access Instructor mode must log in with an Instructor account
+      redirect("/sign-in?redirect_url=/dashboard/instructor");
+    }
   };
 
   const handleAdminSelect = async () => {
     "use server";
-    const { userId: currentUserId } = await auth();
-    if (!currentUserId) {
+    const { userId: activeUserId } = await auth();
+
+    if (!activeUserId) {
       redirect("/sign-in?redirect_url=/dashboard/admin");
     }
-    await setUserRoleAction("ADMIN");
+
+    const userInDb = await prisma.user.findUnique({
+      where: { clerkId: activeUserId },
+      select: { role: true },
+    });
+
+    // ONLY Admin can access Admin Portal directly
+    if (userInDb?.role === "ADMIN") {
+      await setUserRoleAction("ADMIN");
+      redirect("/dashboard/admin");
+    } else {
+      // Student or Instructor attempting to access Admin mode must log in with an Admin account
+      redirect("/sign-in?redirect_url=/dashboard/admin");
+    }
   };
 
   return (
@@ -46,15 +92,22 @@ export default async function SelectRolePage() {
         <div className="flex items-center justify-center gap-3">
           <Badge className="bg-emerald-500/15 text-emerald-400 border border-emerald-500/20 px-3 py-1 text-xs rounded-full inline-flex items-center gap-1">
             <Sparkles className="size-3.5 text-emerald-400" />
-            <span>Interactive Access Mode Selection</span>
+            <span>Role Permission Control Matrix</span>
           </Badge>
+          {isAdmin && (
+            <Badge className="bg-purple-500/20 text-purple-300 border border-purple-500/40 text-xs px-2.5 py-0.5 font-bold">
+              👑 Admin Universal Access Active
+            </Badge>
+          )}
         </div>
 
         <h1 className="text-3xl md:text-5xl font-extrabold text-slate-100 tracking-tight">
           Choose Your Access Mode on <span className="text-emerald-400">CourseForge</span>
         </h1>
         <p className="text-slate-400 text-sm md:text-base leading-relaxed">
-          Select your access mode below. You will be prompted to log into your specific role workspace once you make your choice.
+          {isAdmin
+            ? "As an Admin, you have universal super-user access to test all 3 role portals seamlessly."
+            : "Select your desired access mode. Entering higher-privileged portals will prompt you to log into an authorized account."}
         </p>
       </div>
 
@@ -68,8 +121,13 @@ export default async function SelectRolePage() {
           </div>
 
           <CardHeader className="relative z-10 pb-4">
-            <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl w-fit text-emerald-400 mb-3 group-hover:scale-105 transition-transform">
-              <GraduationCap className="size-7" />
+            <div className="flex justify-between items-center mb-3">
+              <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400 group-hover:scale-105 transition-transform">
+                <GraduationCap className="size-7" />
+              </div>
+              <Badge className="bg-emerald-500/15 text-emerald-400 border-emerald-500/30 text-[10px]">
+                {isAdmin || isInstructor || isStudent ? "1-Click Access" : "Sign In Required"}
+              </Badge>
             </div>
             <CardTitle className="text-xl text-slate-100 font-bold">Student Mode</CardTitle>
             <CardDescription className="text-slate-400 text-xs mt-1">
@@ -109,8 +167,13 @@ export default async function SelectRolePage() {
           </div>
 
           <CardHeader className="relative z-10 pb-4">
-            <div className="p-3 bg-cyan-500/10 border border-cyan-500/20 rounded-xl w-fit text-cyan-400 mb-3 group-hover:scale-105 transition-transform">
-              <Briefcase className="size-7" />
+            <div className="flex justify-between items-center mb-3">
+              <div className="p-3 bg-cyan-500/10 border border-cyan-500/20 rounded-xl text-cyan-400 group-hover:scale-105 transition-transform">
+                <Briefcase className="size-7" />
+              </div>
+              <Badge className={isAdmin || isInstructor ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/40 text-[10px]" : "bg-amber-500/15 text-amber-400 border-amber-500/30 text-[10px]"}>
+                {isAdmin || isInstructor ? "1-Click Access" : "Requires Instructor Log In"}
+              </Badge>
             </div>
             <CardTitle className="text-xl text-slate-100 font-bold">Instructor Mode</CardTitle>
             <CardDescription className="text-slate-400 text-xs mt-1">
@@ -140,7 +203,7 @@ export default async function SelectRolePage() {
                 className="w-full h-10 text-xs flex items-center justify-center gap-2 bg-gradient-to-r from-cyan-500 via-cyan-400 to-teal-400 text-slate-950 font-extrabold hover:from-cyan-400 hover:to-teal-300"
               >
                 <span>Continue as Instructor</span>
-                <ArrowRight className="size-3.5" />
+                {isAdmin || isInstructor ? <ArrowRight className="size-3.5" /> : <Lock className="size-3.5" />}
               </Button>
             </form>
           </div>
@@ -153,8 +216,13 @@ export default async function SelectRolePage() {
           </div>
 
           <CardHeader className="relative z-10 pb-4">
-            <div className="p-3 bg-purple-500/10 border border-purple-500/20 rounded-xl w-fit text-purple-400 mb-3 group-hover:scale-105 transition-transform">
-              <ShieldCheck className="size-7" />
+            <div className="flex justify-between items-center mb-3">
+              <div className="p-3 bg-purple-500/10 border border-purple-500/20 rounded-xl text-purple-400 group-hover:scale-105 transition-transform">
+                <ShieldCheck className="size-7" />
+              </div>
+              <Badge className={isAdmin ? "bg-purple-500/20 text-purple-300 border-purple-500/40 text-[10px]" : "bg-amber-500/15 text-amber-400 border-amber-500/30 text-[10px]"}>
+                {isAdmin ? "1-Click Access (Admin)" : "Requires Admin Log In"}
+              </Badge>
             </div>
             <CardTitle className="text-xl text-slate-100 font-bold flex items-center gap-1.5">
               <span>Admin Mode</span>
@@ -183,7 +251,7 @@ export default async function SelectRolePage() {
             <form action={handleAdminSelect}>
               <Button type="submit" className="w-full h-10 text-xs flex items-center justify-center gap-2 bg-gradient-to-r from-purple-500 via-purple-400 to-indigo-400 text-slate-950 font-extrabold hover:from-purple-400 hover:to-indigo-300">
                 <span>Continue as Admin</span>
-                <ArrowRight className="size-3.5" />
+                {isAdmin ? <ArrowRight className="size-3.5" /> : <Lock className="size-3.5" />}
               </Button>
             </form>
           </div>

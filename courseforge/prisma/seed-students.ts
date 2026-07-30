@@ -4,59 +4,66 @@ import { prisma } from "../src/lib/prisma";
 async function seedStudents() {
   console.log("🌱 Seeding requested students into Supabase cloud database...");
 
-  const studentsToCreate = [
-    { name: "rehmoz ahmad rana", email: "rehmoz.rana@courseforge.com" },
-    { name: "nirmal msukan", email: "nirmal.muskan@courseforge.com" },
-    { name: "afnan ahmad", email: "afnan.ahmad@courseforge.com" },
-    { name: "rana nadeem", email: "rana.nadeem@courseforge.com" },
-    { name: "abdullah farooq", email: "abdullah.farooq@courseforge.com" },
-    { name: "Faisal Friend", email: "faisal.friend@courseforge.com" },
-    { name: "maaz potato", email: "maaz.potato@courseforge.com" },
-    { name: "ali khan", email: "ali.khan@courseforge.com" },
+  const baseStudents = [
+    { name: "rehmoz ahmad rana", handle: "rehmoz.rana" },
+    { name: "nirmal msukan", handle: "nirmal.muskan" },
+    { name: "afnan ahmad", handle: "afnan.ahmad" },
+    { name: "rana nadeem", handle: "rana.nadeem" },
+    { name: "abdullah farooq", handle: "abdullah.farooq" },
+    { name: "Faisal Friend", handle: "faisal.friend" },
+    { name: "maaz potato", handle: "maaz.potato" },
+    { name: "ali khan", handle: "ali.khan" },
   ];
 
-  // Fetch courses to enroll students in
   const courses = await prisma.course.findMany();
 
-  for (const student of studentsToCreate) {
-    const fakeClerkId = `user_${student.email.replace(/[^a-zA-Z0-9]/g, "_")}`;
+  for (const student of baseStudents) {
+    const emails = [
+      `${student.handle}+clerk_test@example.com`,
+      `${student.handle.split('.')[0]}+clerk_test@example.com`,
+      `${student.handle}@example.com`,
+      `${student.handle}@gmail.com`,
+      `${student.handle}@courseforge.com`,
+    ];
 
-    // Upsert student into Supabase PostgreSQL
-    const createdUser = await prisma.user.upsert({
-      where: { email: student.email },
-      update: {
-        role: "STUDENT",
-      },
-      create: {
-        clerkId: fakeClerkId,
-        email: student.email,
-        role: "STUDENT",
-      },
-    });
+    for (const email of emails) {
+      const fakeClerkId = `user_${email.replace(/[^a-zA-Z0-9]/g, "_")}`;
 
-    console.log(`✅ Created student: ${student.name} (${student.email})`);
+      const createdUser = await prisma.user.upsert({
+        where: { email },
+        update: {
+          role: "STUDENT",
+        },
+        create: {
+          clerkId: fakeClerkId,
+          email,
+          role: "STUDENT",
+        },
+      });
 
-    // Enroll student into courses if courses exist
-    if (courses.length > 0) {
-      for (const course of courses.slice(0, 2)) {
-        await prisma.enrollment.upsert({
-          where: {
-            userId_courseId: {
+      console.log(`✅ Seeded student: ${student.name} (${email})`);
+
+      if (courses.length > 0) {
+        for (const course of courses.slice(0, 2)) {
+          await prisma.enrollment.upsert({
+            where: {
+              userId_courseId: {
+                userId: createdUser.id,
+                courseId: course.id,
+              },
+            },
+            update: {},
+            create: {
               userId: createdUser.id,
               courseId: course.id,
             },
-          },
-          update: {},
-          create: {
-            userId: createdUser.id,
-            courseId: course.id,
-          },
-        });
+          });
+        }
       }
     }
   }
 
-  console.log("🎉 All 8 students seeded & enrolled successfully!");
+  console.log("🎉 All 8 student +clerk_test variants seeded & enrolled successfully!");
 }
 
 seedStudents()
