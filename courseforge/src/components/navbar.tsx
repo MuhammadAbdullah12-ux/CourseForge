@@ -106,7 +106,7 @@ export function Navbar({ userId, userRole }: NavbarProps) {
           {isInstructor && (
             <>
               <Link 
-                href="/dashboard/instructor" 
+                href="/dashboard/instructor/courses" 
                 className="px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium text-slate-300 hover:text-cyan-400 hover:bg-slate-900 transition-all flex items-center gap-1.5"
               >
                 <BookOpen className="size-3.5 text-cyan-400" />
@@ -114,11 +114,19 @@ export function Navbar({ userId, userRole }: NavbarProps) {
               </Link>
 
               <Link 
-                href="/dashboard/instructor" 
+                href="/dashboard/instructor/courses/new" 
                 className="px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium text-slate-300 hover:text-cyan-400 hover:bg-slate-900 transition-all flex items-center gap-1.5"
               >
                 <PlusCircle className="size-3.5 text-cyan-400" />
                 <span>+ Create AI Course</span>
+              </Link>
+
+              <Link 
+                href="/dashboard/instructor/analytics" 
+                className="px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium text-slate-300 hover:text-cyan-400 hover:bg-slate-900 transition-all flex items-center gap-1.5"
+              >
+                <BarChart3 className="size-3.5 text-cyan-400" />
+                <span>Analytics</span>
               </Link>
 
               {userId && (
@@ -133,7 +141,7 @@ export function Navbar({ userId, userRole }: NavbarProps) {
             </>
           )}
 
-          {/* 🟪 ADMIN DEDICATED WEBPAGE LINKS (SEPARATE DEDICATED URLS) */}
+          {/* 🟪 ADMIN DEDICATED WEBPAGE LINKS */}
           {isAdmin && (
             <>
               <Link 
@@ -231,7 +239,7 @@ export function Navbar({ userId, userRole }: NavbarProps) {
 
       </nav>
 
-      {/* Mobile Menu Dropdown Drawer (Role Specific Dedicated URLs) */}
+      {/* Mobile Menu Dropdown Drawer */}
       {isMobileMenuOpen && (
         <div className="md:hidden border-b border-slate-800 bg-slate-950/95 backdrop-blur-2xl px-6 py-4 space-y-3 shadow-2xl animate-in slide-in-from-top-2">
           <Link
@@ -243,7 +251,48 @@ export function Navbar({ userId, userRole }: NavbarProps) {
             <span>Home</span>
           </Link>
 
-          {/* Admin Dedicated Mobile Links */}
+          {/* Instructor Dedicated Mobile Links */}
+          {isInstructor && (
+            <>
+              <Link
+                href="/dashboard/instructor/courses"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center gap-2.5 p-2.5 rounded-xl text-sm font-medium text-slate-200 hover:bg-slate-900 hover:text-cyan-400 transition-colors"
+              >
+                <BookOpen className="size-4 text-cyan-400" />
+                <span>My Published Courses</span>
+              </Link>
+
+              <Link
+                href="/dashboard/instructor/courses/new"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center gap-2.5 p-2.5 rounded-xl text-sm font-medium text-slate-200 hover:bg-slate-900 hover:text-cyan-400 transition-colors"
+              >
+                <PlusCircle className="size-4 text-cyan-400" />
+                <span>+ Create AI Course</span>
+              </Link>
+
+              <Link
+                href="/dashboard/instructor/analytics"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center gap-2.5 p-2.5 rounded-xl text-sm font-medium text-slate-200 hover:bg-slate-900 hover:text-cyan-400 transition-colors"
+              >
+                <BarChart3 className="size-4 text-cyan-400" />
+                <span>Analytics Suite</span>
+              </Link>
+
+              <Link
+                href="/dashboard/instructor"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center gap-2.5 p-2.5 rounded-xl text-sm font-bold text-cyan-300 bg-cyan-500/15 border border-cyan-500/30"
+              >
+                <Briefcase className="size-4 text-cyan-400" />
+                <span>Instructor Portal</span>
+              </Link>
+            </>
+          )}
+
+          {/* Admin Mobile Links */}
           {isAdmin && (
             <>
               <Link
@@ -253,24 +302,6 @@ export function Navbar({ userId, userRole }: NavbarProps) {
               >
                 <UserCog className="size-4 text-purple-400" />
                 <span>User Directory</span>
-              </Link>
-
-              <Link
-                href="/dashboard/admin/courses"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="flex items-center gap-2.5 p-2.5 rounded-xl text-sm font-medium text-slate-200 hover:bg-slate-900 hover:text-purple-400 transition-colors"
-              >
-                <Sliders className="size-4 text-purple-400" />
-                <span>Course Moderation</span>
-              </Link>
-
-              <Link
-                href="/dashboard/admin/telemetry"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="flex items-center gap-2.5 p-2.5 rounded-xl text-sm font-medium text-slate-200 hover:bg-slate-900 hover:text-purple-400 transition-colors"
-              >
-                <BarChart3 className="size-4 text-purple-400" />
-                <span>Telemetry Stream</span>
               </Link>
 
               <Link
@@ -284,21 +315,7 @@ export function Navbar({ userId, userRole }: NavbarProps) {
             </>
           )}
 
-          {/* Instructor Dedicated Mobile Links */}
-          {isInstructor && (
-            <>
-              <Link
-                href="/dashboard/instructor"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="flex items-center gap-2.5 p-2.5 rounded-xl text-sm font-bold text-cyan-300 bg-cyan-500/15 border border-cyan-500/30"
-              >
-                <Briefcase className="size-4 text-cyan-400" />
-                <span>Instructor Portal</span>
-              </Link>
-            </>
-          )}
-
-          {/* Student Dedicated Mobile Links */}
+          {/* Student Mobile Links */}
           {isStudent && (
             <>
               <Link
