@@ -29,9 +29,20 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // 1. Resolve user session and role claims on the server
+  // 1. Resolve user session safely
   const { userId, sessionClaims } = await auth();
-  const userRole = sessionClaims?.metadata?.role;
+
+  let userRole: string | undefined = undefined;
+  try {
+    if (sessionClaims && typeof sessionClaims === "object") {
+      const metadata = (sessionClaims as Record<string, any>).metadata;
+      if (metadata && typeof metadata === "object") {
+        userRole = metadata.role;
+      }
+    }
+  } catch {
+    userRole = undefined;
+  }
 
   return (
     <ClerkProvider>

@@ -2,10 +2,11 @@ import React from "react";
 import Link from "next/link";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
+import { AICourseCreatorModal } from "@/components/ai-course-creator-modal";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, PlusCircle, Users, DollarSign, BarChart3, Clock, Eye } from "lucide-react";
+import { BookOpen, Users, BarChart3, Clock, Eye, Sparkles } from "lucide-react";
 
 export default async function InstructorDashboardPage() {
   const { userId } = await auth();
@@ -47,7 +48,7 @@ export default async function InstructorDashboardPage() {
             Instructor Management Dashboard
           </h1>
           <p className="text-slate-400 text-sm md:text-base mt-1">
-            Manage your courses, track student analytics, and build new learning paths.
+            Manage your courses, track student analytics, and build new learning paths with AI assistance.
           </p>
         </div>
 
@@ -58,131 +59,111 @@ export default async function InstructorDashboardPage() {
               View Public Catalog
             </Button>
           </Link>
-          <Link href="/dashboard/instructor/courses/new">
-            <Button variant="brand" className="flex items-center gap-2">
-              <PlusCircle className="size-4" />
-              <span>Create New Course</span>
-            </Button>
-          </Link>
         </div>
       </div>
 
-      {/* Analytics Overview Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-        {/* Stat Card 1: Total Courses */}
-        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-sm">
+      {/* Analytics Overview Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        <Card className="border-slate-800 bg-slate-900/60 backdrop-blur-md">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-slate-400">Total Courses</CardTitle>
+            <CardTitle className="text-sm font-medium text-slate-400">Total Created Courses</CardTitle>
             <BookOpen className="size-4 text-emerald-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-slate-100">{totalCourses}</div>
-            <p className="text-xs text-slate-500 mt-1">Published on platform</p>
+            <div className="text-3xl font-extrabold text-slate-100">{totalCourses}</div>
+            <p className="text-xs text-slate-400 mt-1">Published on CourseForge</p>
           </CardContent>
         </Card>
 
-        {/* Stat Card 2: Enrolled Students */}
-        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-sm">
+        <Card className="border-slate-800 bg-slate-900/60 backdrop-blur-md">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-slate-400">Total Enrolled</CardTitle>
+            <CardTitle className="text-sm font-medium text-slate-400">Total Student Enrollments</CardTitle>
             <Users className="size-4 text-emerald-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-slate-100">{totalEnrollments}</div>
-            <p className="text-xs text-slate-500 mt-1">Active student learners</p>
+            <div className="text-3xl font-extrabold text-slate-100">{totalEnrollments}</div>
+            <p className="text-xs text-slate-400 mt-1">Active student learners</p>
           </CardContent>
         </Card>
 
-        {/* Stat Card 3: Total Curriculum Lessons */}
-        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-sm">
+        <Card className="border-slate-800 bg-slate-900/60 backdrop-blur-md">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-slate-400">Total Lessons</CardTitle>
-            <Clock className="size-4 text-emerald-400" />
+            <CardTitle className="text-sm font-medium text-slate-400">Curriculum Modules</CardTitle>
+            <BarChart3 className="size-4 text-emerald-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-slate-100">{totalLessons}</div>
-            <p className="text-xs text-slate-500 mt-1">Curriculum modules</p>
-          </CardContent>
-        </Card>
-
-        {/* Stat Card 4: Estimated Earnings */}
-        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-sm">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-slate-400">Estimated Revenue</CardTitle>
-            <DollarSign className="size-4 text-emerald-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-slate-100">$0.00</div>
-            <p className="text-xs text-slate-500 mt-1">Stripe Connect integration</p>
+            <div className="text-3xl font-extrabold text-slate-100">{totalLessons}</div>
+            <p className="text-xs text-slate-400 mt-1">Total active lessons</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Courses Management Table / Grid Section */}
+      {/* 1-Click AI Course Creator Component */}
+      <div className="mb-12">
+        <AICourseCreatorModal />
+      </div>
+
+      {/* Published Courses Grid Section */}
       <div className="space-y-6">
-        <div className="flex justify-between items-center pb-2 border-b border-slate-800">
-          <h2 className="text-xl font-bold text-slate-200 flex items-center gap-2">
-            <BarChart3 className="size-5 text-emerald-400" />
-            <span>Your Managed Courses</span>
-          </h2>
-          <span className="text-xs text-slate-400">Showing {courses.length} courses</span>
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-xl font-bold text-slate-100">Your Published Courses</h2>
+            <p className="text-xs text-slate-400">Real-time status of your course catalog</p>
+          </div>
         </div>
 
         {courses.length === 0 ? (
-          // Clean Empty State when instructor has no courses yet
-          <Card className="border-slate-800 bg-slate-900/30 py-12 text-center">
-            <CardContent className="flex flex-col items-center justify-center space-y-4">
-              <div className="p-4 bg-slate-800/60 rounded-full text-emerald-400">
-                <BookOpen className="size-8" />
+          <Card className="border-slate-800 bg-slate-900/40 py-12 text-center">
+            <CardContent className="space-y-3">
+              <div className="p-3 bg-slate-800/60 rounded-full text-slate-400 w-fit mx-auto">
+                <BookOpen className="size-6" />
               </div>
-              <div className="max-w-md">
-                <h3 className="text-lg font-semibold text-slate-200">No courses created yet</h3>
-                <p className="text-sm text-slate-400 mt-1">
-                  You are authorized as an Instructor. Start building your first course module to share knowledge with students.
-                </p>
-              </div>
-              <Link href="/dashboard/instructor/courses/new">
-                <Button variant="brand" className="flex items-center gap-2">
-                  <PlusCircle className="size-4" />
-                  <span>Create Your First Course</span>
-                </Button>
-              </Link>
+              <h3 className="text-base font-bold text-slate-200">No courses created yet</h3>
+              <p className="text-xs text-slate-400 max-w-sm mx-auto">
+                Use the 1-Click AI Assistant above to instantly draft and publish your first course.
+              </p>
             </CardContent>
           </Card>
         ) : (
-          // Course Cards Grid
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {courses.map((course) => (
-              <Card key={course.id} className="border-slate-800 bg-slate-900/40 hover:border-slate-700 transition-colors">
+              <Card key={course.id} className="border-slate-800 bg-slate-900/50 hover:bg-slate-900/80 transition-all flex flex-col justify-between">
                 <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <Badge variant={course.published ? "default" : "secondary"} className={course.published ? "bg-emerald-500/15 text-emerald-400" : ""}>
-                      {course.published ? "Published" : "Draft"}
+                  <div className="flex justify-between items-start gap-2 mb-2">
+                    <Badge className="bg-emerald-500/15 text-emerald-400 border border-emerald-500/20 text-[10px]">
+                      Published
                     </Badge>
-                    <span className="text-xs text-slate-500">
-                      ID: {course.id}
+                    <span className="text-[11px] text-slate-500 flex items-center gap-1">
+                      <Clock className="size-3" />
+                      {new Date(course.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                     </span>
                   </div>
-                  <CardTitle className="text-lg text-slate-200 mt-2">{course.title}</CardTitle>
-                  <CardDescription className="text-sm text-slate-400 line-clamp-2 mt-1">
+                  <CardTitle className="text-base font-bold text-slate-100 line-clamp-1">
+                    {course.title}
+                  </CardTitle>
+                  <CardDescription className="text-xs text-slate-400 line-clamp-2 mt-1">
                     {course.description}
                   </CardDescription>
                 </CardHeader>
-                <CardFooter className="border-t border-slate-800/80 pt-4 flex justify-between items-center">
-                  <div className="flex items-center gap-4 text-xs text-slate-400">
+
+                <CardContent className="py-2">
+                  <div className="flex items-center justify-between text-xs text-slate-400 border-t border-slate-800/80 pt-3">
                     <span className="flex items-center gap-1">
                       <Users className="size-3.5 text-emerald-400" />
-                      <span>{course.enrollments.length} Students</span>
+                      <strong>{course.enrollments.length}</strong> enrolled
                     </span>
                     <span className="flex items-center gap-1">
-                      <Clock className="size-3.5 text-emerald-400" />
-                      <span>{course.lessons.length} Lessons</span>
+                      <BookOpen className="size-3.5 text-emerald-400" />
+                      <strong>{course.lessons.length}</strong> modules
                     </span>
                   </div>
-                  <Link href={`/courses/${course.id}`}>
-                    <Button variant="ghost" size="sm" className="text-xs flex items-center gap-1 text-slate-300 hover:text-white">
+                </CardContent>
+
+                <CardFooter className="pt-3">
+                  <Link href={`/courses/${course.id}`} className="w-full">
+                    <Button variant="outline" size="sm" className="w-full border-slate-800 hover:border-emerald-500/40 flex items-center justify-center gap-1.5 text-xs">
                       <Eye className="size-3.5" />
-                      <span>Preview</span>
+                      <span>View Course Page</span>
                     </Button>
                   </Link>
                 </CardFooter>
@@ -191,6 +172,7 @@ export default async function InstructorDashboardPage() {
           </div>
         )}
       </div>
+
     </main>
   );
 }
