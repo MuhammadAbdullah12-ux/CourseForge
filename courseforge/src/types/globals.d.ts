@@ -1,7 +1,7 @@
 export {};
 
-// Define allowed application roles matching our Prisma schema
-export type UserRole = "INSTRUCTOR" | "STUDENT";
+// Define allowed application roles matching our Prisma schema and Clerk metadata
+export type UserRole = "INSTRUCTOR" | "STUDENT" | "ADMIN";
 
 declare global {
   // 1. Extend Clerk's Session Claims type to include custom metadata properties

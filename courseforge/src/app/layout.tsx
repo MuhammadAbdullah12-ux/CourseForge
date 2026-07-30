@@ -5,6 +5,7 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import { ClerkProvider } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
+import { prisma } from "@/lib/prisma";
 import { Navbar } from "@/components/navbar";
 import { Code2, Database, Shield, Zap } from "lucide-react";
 
@@ -30,19 +31,32 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // 1. Resolve user session safely
+  // 1. Resolve authenticated user session
   const { userId, sessionClaims } = await auth();
 
   let userRole: string | undefined = undefined;
-  try {
-    if (sessionClaims && typeof sessionClaims === "object") {
-      const metadata = (sessionClaims as Record<string, any>).metadata;
-      if (metadata && typeof metadata === "object") {
-        userRole = metadata.role;
+
+  // 2. Fetch live database role directly from Supabase PostgreSQL for 100% instant dynamic updates
+  if (userId) {
+    try {
+      const dbUser = await prisma.user.findUnique({
+        where: { clerkId: userId },
+        select: { role: true },
+      });
+      if (dbUser?.role) {
+        userRole = dbUser.role;
       }
+    } catch {
+      userRole = undefined;
     }
-  } catch {
-    userRole = undefined;
+  }
+
+  // Fallback to JWT Claims metadata if database record is pending creation
+  if (!userRole && sessionClaims && typeof sessionClaims === "object") {
+    const metadata = (sessionClaims as Record<string, any>).metadata;
+    if (metadata && typeof metadata === "object") {
+      userRole = metadata.role;
+    }
   }
 
   return (
@@ -101,6 +115,7 @@ export default async function RootLayout({
                 <ul className="space-y-1.5 text-xs">
                   <li><Link href="/dashboard/student" className="hover:text-emerald-400 transition-colors">Student Dashboard</Link></li>
                   <li><Link href="/dashboard/instructor" className="hover:text-emerald-400 transition-colors">Instructor Portal</Link></li>
+                  <li><Link href="/dashboard/admin" className="hover:text-purple-400 transition-colors">Admin Portal</Link></li>
                   <li>
                     <a 
                       href="https://github.com/MuhammadAbdullah12-ux/CourseForge" 

@@ -1,64 +1,51 @@
 "use server";
 
-import { auth, createClerkClient } from "@clerk/nextjs/server";
-import { prisma } from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
+import { prisma } from "@/lib/prisma";
 
-export async function setUserRoleAction(role: "STUDENT" | "INSTRUCTOR") {
-  // 1. Authenticate the user
-  const { userId, sessionClaims } = await auth();
+export async function setUserRoleAction(role: "STUDENT" | "INSTRUCTOR" | "ADMIN") {
+  const { userId } = await auth();
 
-  // If user is not logged in yet as a guest visitor
   if (!userId) {
-    if (role === "INSTRUCTOR") {
-      redirect("/sign-in");
-    } else {
-      redirect("/courses");
-    }
+    redirect("/sign-in");
   }
 
-  // 2. Update Public Metadata in Clerk if secret key exists
-  const clerkSecretKey = process.env.CLERK_SECRET_KEY;
-  if (clerkSecretKey) {
-    try {
-      const clerkClient = createClerkClient({ secretKey: clerkSecretKey });
-      await clerkClient.users.updateUserMetadata(userId, {
-        publicMetadata: {
-          role: role,
-        },
-      });
-    } catch (error) {
-      console.error("Error updating Clerk user metadata:", error);
-    }
-  }
+  // 1. Fetch user from Clerk SDK to get primary email
+  const client = await clerkClient();
+  const clerkUser = await client.users.getUser(userId);
 
-  // 3. Upsert User record in Supabase PostgreSQL
-  const userEmail =
-    (sessionClaims?.email as string) ||
-    `user_${userId.slice(-6)}@courseforge.com`;
+  const primaryEmail = clerkUser.emailAddresses[0]?.emailAddress || `${userId}@placeholder.com`;
 
+  // 2. Upsert user in Supabase PostgreSQL database via Prisma
   await prisma.user.upsert({
     where: { clerkId: userId },
-    update: {
-      role: role,
-    },
+    update: { role },
     create: {
       clerkId: userId,
-      email: userEmail,
-      role: role,
+      email: primaryEmail,
+      role,
     },
   });
 
-  // 4. Invalidate caches across the platform
-  revalidatePath("/", "layout");
-  revalidatePath("/courses", "layout");
-  revalidatePath("/dashboard/instructor", "layout");
+  // 3. Sync role to Clerk public metadata
+  await client.users.updateUserMetadata(userId, {
+    publicMetadata: {
+      role,
+    },
+  });
 
-  // 5. Redirect user according to selected role
-  if (role === "INSTRUCTOR") {
+  // 4. Revalidate root layout cache so Navbar updates instantly
+  revalidatePath("/", "layout");
+  revalidatePath("/select-role");
+
+  // 5. Redirect based on chosen role
+  if (role === "ADMIN") {
+    redirect("/dashboard/admin");
+  } else if (role === "INSTRUCTOR") {
     redirect("/dashboard/instructor");
   } else {
-    redirect("/courses");
+    redirect("/dashboard/student");
   }
 }

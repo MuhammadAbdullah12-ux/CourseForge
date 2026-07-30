@@ -2,8 +2,22 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { UserButton } from "@clerk/nextjs";
-import { Menu, X, Home, BookOpen, GraduationCap, LayoutDashboard, Shield, Zap } from "lucide-react";
+import {
+  Menu,
+  X,
+  Home,
+  BookOpen,
+  GraduationCap,
+  ShieldCheck,
+  Briefcase,
+  RefreshCw,
+  PlusCircle,
+  Users,
+  BarChart3,
+  BookMarked,
+} from "lucide-react";
 
 interface NavbarProps {
   userId: string | null;
@@ -12,10 +26,24 @@ interface NavbarProps {
 
 export function Navbar({ userId, userRole }: NavbarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const pathname = usePathname();
+
+  // Hide Navbar completely on onboarding screens (Select Role, Sign In, Sign Up)
+  if (
+    pathname === "/select-role" ||
+    pathname.startsWith("/sign-in") ||
+    pathname.startsWith("/sign-up")
+  ) {
+    return null;
+  }
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen((prev) => !prev);
   };
+
+  const isAdmin = userRole === "ADMIN";
+  const isInstructor = userRole === "INSTRUCTOR";
+  const isStudent = userRole === "STUDENT" || (!isAdmin && !isInstructor);
 
   return (
     <header className="border-b border-slate-800/80 bg-slate-950/75 backdrop-blur-xl sticky top-0 z-50 transition-all">
@@ -29,49 +57,99 @@ export function Navbar({ userId, userRole }: NavbarProps) {
           <span>CourseForge</span>
         </Link>
         
-        {/* Desktop Navigation Links (Hidden on mobile < md) */}
+        {/* Desktop Navigation Links (Tailored specifically for each role) */}
         <div className="hidden md:flex gap-2 sm:gap-3 items-center">
+          
           <Link 
             href="/" 
-            className="px-3.5 py-1.5 rounded-xl text-sm font-medium text-slate-300 hover:text-slate-950 hover:bg-gradient-to-r hover:from-emerald-400 hover:to-teal-300 hover:font-bold hover:scale-105 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/25 transition-all duration-200 ease-out"
+            className="px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-900 transition-all"
           >
             Home
           </Link>
-          <Link 
-            href="/about" 
-            className="px-3.5 py-1.5 rounded-xl text-sm font-medium text-slate-300 hover:text-slate-950 hover:bg-gradient-to-r hover:from-emerald-400 hover:to-teal-300 hover:font-bold hover:scale-105 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/25 transition-all duration-200 ease-out"
-          >
-            About
-          </Link>
-          <Link 
-            href="/courses" 
-            className="px-3.5 py-1.5 rounded-xl text-sm font-medium text-slate-300 hover:text-slate-950 hover:bg-gradient-to-r hover:from-emerald-400 hover:to-teal-300 hover:font-bold hover:scale-105 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/25 transition-all duration-200 ease-out"
-          >
-            Courses
-          </Link>
 
-          {/* Render Dashboard link for signed-in users */}
-          {userId && (
-            <Link 
-              href={userRole === "INSTRUCTOR" ? "/dashboard/instructor" : "/dashboard/student"} 
-              className="px-3.5 py-1.5 rounded-xl text-sm font-bold text-emerald-400 hover:text-slate-950 hover:bg-gradient-to-r hover:from-emerald-400 hover:to-teal-300 hover:scale-105 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/25 transition-all duration-200 ease-out"
-            >
-              Dashboard
-            </Link>
+          {/* 🟩 STUDENT SPECIFIC LINKS */}
+          {isStudent && (
+            <>
+              <Link 
+                href="/courses" 
+                className="px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium text-slate-300 hover:text-emerald-400 hover:bg-slate-900 transition-all flex items-center gap-1.5"
+              >
+                <BookOpen className="size-3.5 text-emerald-400" />
+                <span>Explore Catalog</span>
+              </Link>
+
+              {userId && (
+                <Link
+                  href="/dashboard/student"
+                  className="px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold text-emerald-300 bg-emerald-500/15 border border-emerald-500/40 hover:bg-emerald-400 hover:text-slate-950 hover:scale-105 transition-all flex items-center gap-1.5 shadow-md shadow-emerald-500/10"
+                >
+                  <GraduationCap className="size-3.5" />
+                  <span>Student Dashboard</span>
+                </Link>
+              )}
+            </>
           )}
 
-          {/* Render Permanent Select Role Button */}
+          {/* 🟦 INSTRUCTOR SPECIFIC LINKS */}
+          {isInstructor && (
+            <>
+              <Link 
+                href="/courses" 
+                className="px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium text-slate-300 hover:text-cyan-400 hover:bg-slate-900 transition-all flex items-center gap-1.5"
+              >
+                <BookOpen className="size-3.5 text-cyan-400" />
+                <span>Courses Catalog</span>
+              </Link>
+
+              {userId && (
+                <Link
+                  href="/dashboard/instructor"
+                  className="px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold text-cyan-300 bg-cyan-500/15 border border-cyan-500/40 hover:bg-cyan-400 hover:text-slate-950 hover:scale-105 transition-all flex items-center gap-1.5 shadow-md shadow-cyan-500/10"
+                >
+                  <Briefcase className="size-3.5" />
+                  <span>Instructor Portal</span>
+                </Link>
+              )}
+            </>
+          )}
+
+          {/* 🟪 ADMIN SPECIFIC LINKS */}
+          {isAdmin && (
+            <>
+              <Link 
+                href="/courses" 
+                className="px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium text-slate-300 hover:text-purple-400 hover:bg-slate-900 transition-all flex items-center gap-1.5"
+              >
+                <BookOpen className="size-3.5 text-purple-400" />
+                <span>Catalog Moderation</span>
+              </Link>
+
+              {userId && (
+                <Link
+                  href="/dashboard/admin"
+                  className="px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold text-purple-300 bg-purple-500/15 border border-purple-500/40 hover:bg-purple-500 hover:text-slate-950 hover:scale-105 transition-all flex items-center gap-1.5 shadow-md shadow-purple-500/10"
+                >
+                  <ShieldCheck className="size-3.5" />
+                  <span>Admin Portal</span>
+                </Link>
+              )}
+            </>
+          )}
+
+          {/* ACTIONABLE "SWITCH MODE 🔄" BUTTON */}
           <Link 
             href="/select-role" 
-            title="Choose or switch between Student and Instructor access modes"
-            className="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-gradient-to-r hover:from-emerald-500 hover:to-teal-400 hover:text-slate-950 hover:border-emerald-300 hover:scale-105 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/30 transition-all duration-200 ease-out flex items-center gap-1.5"
+            title="Switch between Student, Instructor, and Admin access modes"
+            className={`px-3 py-1.5 rounded-full text-xs font-semibold border hover:scale-105 transition-all duration-200 ease-out flex items-center gap-1.5 ${
+              isAdmin
+                ? "bg-purple-500/10 text-purple-400 border-purple-500/30 hover:bg-purple-500 hover:text-slate-950"
+                : isInstructor
+                ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/30 hover:bg-cyan-400 hover:text-slate-950"
+                : "bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-400 hover:text-slate-950"
+            }`}
           >
-            <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span>
-              {userId 
-                ? (userRole === "INSTRUCTOR" ? "Instructor Mode" : "Student Mode") 
-                : "Select Role"}
-            </span>
+            <RefreshCw className="size-3" />
+            <span>Switch Mode</span>
           </Link>
 
           {/* Auth Controls */}
@@ -79,13 +157,13 @@ export function Navbar({ userId, userRole }: NavbarProps) {
             <div className="flex items-center gap-2 ml-2">
               <Link 
                 href="/sign-in" 
-                className="px-3.5 py-1.5 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 hover:scale-105 hover:-translate-y-0.5 transition-all duration-200 ease-out"
+                className="px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-all"
               >
                 Sign In
               </Link>
               <Link 
                 href="/sign-up" 
-                className="px-4 py-1.5 rounded-xl text-sm font-extrabold bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 hover:from-emerald-400 hover:to-teal-300 hover:scale-105 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/30 transition-all duration-200 ease-out"
+                className="px-4 py-1.5 rounded-xl text-xs sm:text-sm font-extrabold bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 hover:from-emerald-400 hover:to-teal-300 hover:scale-105 transition-all"
               >
                 Sign Up
               </Link>
@@ -97,7 +175,7 @@ export function Navbar({ userId, userRole }: NavbarProps) {
           )}
         </div>
 
-        {/* Mobile Hamburger Toggle Button (Visible only on < md) */}
+        {/* Mobile Hamburger Toggle Button */}
         <div className="flex items-center gap-3 md:hidden">
           {userId && (
             <div className="flex items-center">
@@ -117,7 +195,7 @@ export function Navbar({ userId, userRole }: NavbarProps) {
 
       </nav>
 
-      {/* Mobile Menu Dropdown Drawer */}
+      {/* Mobile Menu Dropdown Drawer (Role Customized) */}
       {isMobileMenuOpen && (
         <div className="md:hidden border-b border-slate-800 bg-slate-950/95 backdrop-blur-2xl px-6 py-4 space-y-3 shadow-2xl animate-in slide-in-from-top-2">
           <Link
@@ -130,15 +208,6 @@ export function Navbar({ userId, userRole }: NavbarProps) {
           </Link>
 
           <Link
-            href="/about"
-            onClick={() => setIsMobileMenuOpen(false)}
-            className="flex items-center gap-2.5 p-2.5 rounded-xl text-sm font-medium text-slate-200 hover:bg-slate-900 hover:text-emerald-400 transition-colors"
-          >
-            <GraduationCap className="size-4 text-emerald-400" />
-            <span>About</span>
-          </Link>
-
-          <Link
             href="/courses"
             onClick={() => setIsMobileMenuOpen(false)}
             className="flex items-center gap-2.5 p-2.5 rounded-xl text-sm font-medium text-slate-200 hover:bg-slate-900 hover:text-emerald-400 transition-colors"
@@ -147,47 +216,57 @@ export function Navbar({ userId, userRole }: NavbarProps) {
             <span>Courses Catalog</span>
           </Link>
 
-          {userId && (
+          {/* Mobile Dedicated Role Portal Links */}
+          {isAdmin && (
             <Link
-              href={userRole === "INSTRUCTOR" ? "/dashboard/instructor" : "/dashboard/student"}
+              href="/dashboard/admin"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="flex items-center gap-2.5 p-2.5 rounded-xl text-sm font-bold text-emerald-400 hover:bg-slate-900 transition-colors"
+              className="flex items-center gap-2.5 p-2.5 rounded-xl text-sm font-bold text-purple-300 bg-purple-500/15 border border-purple-500/30"
             >
-              <LayoutDashboard className="size-4" />
-              <span>Dashboard Portal</span>
+              <ShieldCheck className="size-4 text-purple-400" />
+              <span>Admin Portal</span>
+            </Link>
+          )}
+
+          {isInstructor && (
+            <Link
+              href="/dashboard/instructor"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="flex items-center gap-2.5 p-2.5 rounded-xl text-sm font-bold text-cyan-300 bg-cyan-500/15 border border-cyan-500/30"
+            >
+              <Briefcase className="size-4 text-cyan-400" />
+              <span>Instructor Portal</span>
+            </Link>
+          )}
+
+          {isStudent && (
+            <Link
+              href="/dashboard/student"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="flex items-center gap-2.5 p-2.5 rounded-xl text-sm font-bold text-emerald-300 bg-emerald-500/15 border border-emerald-500/30"
+            >
+              <GraduationCap className="size-4 text-emerald-400" />
+              <span>Student Dashboard</span>
             </Link>
           )}
 
           <Link
             href="/select-role"
             onClick={() => setIsMobileMenuOpen(false)}
-            className="flex items-center justify-between p-2.5 rounded-xl text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
+            className={`flex items-center justify-between p-2.5 rounded-xl text-xs font-semibold border ${
+              isAdmin
+                ? "bg-purple-500/10 text-purple-400 border-purple-500/30"
+                : isInstructor
+                ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/30"
+                : "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+            }`}
           >
             <span className="flex items-center gap-2">
-              <span className="size-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>{userRole === "INSTRUCTOR" ? "Instructor Mode" : "Student Mode"}</span>
+              <RefreshCw className="size-3" />
+              <span>Switch Mode</span>
             </span>
-            <span className="text-[11px] underline">Switch Mode</span>
+            <span className="text-[11px] underline">Choose Role</span>
           </Link>
-
-          {!userId && (
-            <div className="pt-2 border-t border-slate-800 flex gap-2">
-              <Link
-                href="/sign-in"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="flex-1 py-2 text-center rounded-xl text-xs font-semibold bg-slate-900 text-slate-200 border border-slate-800"
-              >
-                Sign In
-              </Link>
-              <Link
-                href="/sign-up"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="flex-1 py-2 text-center rounded-xl text-xs font-bold bg-emerald-500 text-slate-950"
-              >
-                Sign Up
-              </Link>
-            </div>
-          )}
         </div>
       )}
     </header>

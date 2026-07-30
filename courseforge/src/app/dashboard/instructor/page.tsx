@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { getInstructorAnalyticsAction } from "@/app/actions/analytics-actions";
@@ -14,11 +15,32 @@ import { BookOpen, Users, BarChart3, Clock, Eye, Sparkles } from "lucide-react";
 export default async function InstructorDashboardPage() {
   const { userId } = await auth();
 
-  // 1. Fetch courses created by this instructor from Supabase database
+  if (!userId) {
+    redirect("/sign-in");
+  }
+
+  // 1. Resolve live database role for strict authorization
+  const dbUser = await prisma.user.findUnique({
+    where: { clerkId: userId },
+    select: { role: true },
+  });
+
+  const role = dbUser?.role;
+
+  // Strict Role Guard: Students cannot access Instructor Management Portal
+  if (role === "STUDENT") {
+    redirect("/dashboard/student");
+  }
+
+  if (!role) {
+    redirect("/select-role");
+  }
+
+  // 2. Fetch courses created by this instructor from Supabase database
   const courses = await prisma.course.findMany({
     where: {
       instructor: {
-        clerkId: userId || "",
+        clerkId: userId,
       },
     },
     include: {
@@ -30,7 +52,7 @@ export default async function InstructorDashboardPage() {
     },
   });
 
-  // 2. Fetch pre-aggregated analytics metrics from Supabase PostgreSQL
+  // 3. Fetch pre-aggregated analytics metrics from Supabase PostgreSQL
   const analyticsData = await getInstructorAnalyticsAction();
 
   // Calculate high-level analytics
@@ -45,10 +67,10 @@ export default async function InstructorDashboardPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10 pb-6 border-b border-slate-800">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <Badge className="bg-emerald-500/15 text-emerald-400 border border-emerald-500/20 px-3 py-0.5 text-xs rounded-full font-medium">
+            <Badge className="bg-cyan-500/15 text-cyan-400 border border-cyan-500/30 px-3 py-0.5 text-xs rounded-full font-medium">
               Instructor Portal
             </Badge>
-            <span className="text-xs text-slate-400">Role-Based Secured Route</span>
+            <span className="text-xs text-slate-400">Role-Secured Route</span>
           </div>
           <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-100">
             Instructor Management Dashboard
@@ -73,7 +95,7 @@ export default async function InstructorDashboardPage() {
         <Card className="border-slate-800 bg-slate-900/60 backdrop-blur-md">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-slate-400">Total Created Courses</CardTitle>
-            <BookOpen className="size-4 text-emerald-400" />
+            <BookOpen className="size-4 text-cyan-400" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-extrabold text-slate-100">{totalCourses}</div>
@@ -84,7 +106,7 @@ export default async function InstructorDashboardPage() {
         <Card className="border-slate-800 bg-slate-900/60 backdrop-blur-md">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-slate-400">Total Student Enrollments</CardTitle>
-            <Users className="size-4 text-emerald-400" />
+            <Users className="size-4 text-cyan-400" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-extrabold text-slate-100">{totalEnrollments}</div>
@@ -95,7 +117,7 @@ export default async function InstructorDashboardPage() {
         <Card className="border-slate-800 bg-slate-900/60 backdrop-blur-md">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-slate-400">Curriculum Modules</CardTitle>
-            <BarChart3 className="size-4 text-emerald-400" />
+            <BarChart3 className="size-4 text-cyan-400" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-extrabold text-slate-100">{totalLessons}</div>
@@ -108,10 +130,10 @@ export default async function InstructorDashboardPage() {
       <div className="space-y-4 mb-12">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-bold text-slate-100 flex items-center gap-2">
-            <BarChart3 className="size-5 text-emerald-400" />
+            <BarChart3 className="size-5 text-cyan-400" />
             <span>Interactive Analytics Charts</span>
           </h2>
-          <Badge className="bg-emerald-500/15 text-emerald-400 border border-emerald-500/20 text-xs">
+          <Badge className="bg-cyan-500/15 text-cyan-400 border border-cyan-500/30 text-xs">
             Recharts Visual Engine
           </Badge>
         </div>
@@ -154,7 +176,7 @@ export default async function InstructorDashboardPage() {
               <Card key={course.id} className="border-slate-800 bg-slate-900/50 hover:bg-slate-900/80 transition-all flex flex-col justify-between">
                 <CardHeader>
                   <div className="flex justify-between items-start gap-2 mb-2">
-                    <Badge className="bg-emerald-500/15 text-emerald-400 border border-emerald-500/20 text-[10px]">
+                    <Badge className="bg-cyan-500/15 text-cyan-400 border border-cyan-500/30 text-[10px]">
                       Published
                     </Badge>
                     <span className="text-[11px] text-slate-500 flex items-center gap-1">
@@ -173,11 +195,11 @@ export default async function InstructorDashboardPage() {
                 <CardContent className="py-2">
                   <div className="flex items-center justify-between text-xs text-slate-400 border-t border-slate-800/80 pt-3">
                     <span className="flex items-center gap-1">
-                      <Users className="size-3.5 text-emerald-400" />
+                      <Users className="size-3.5 text-cyan-400" />
                       <strong>{course.enrollments.length}</strong> enrolled
                     </span>
                     <span className="flex items-center gap-1">
-                      <BookOpen className="size-3.5 text-emerald-400" />
+                      <BookOpen className="size-3.5 text-cyan-400" />
                       <strong>{course.lessons.length}</strong> modules
                     </span>
                   </div>
@@ -185,7 +207,7 @@ export default async function InstructorDashboardPage() {
 
                 <CardFooter className="pt-3">
                   <Link href={`/courses/${course.id}`} className="w-full">
-                    <Button variant="outline" size="sm" className="w-full border-slate-800 hover:border-emerald-500/40 flex items-center justify-center gap-1.5 text-xs">
+                    <Button variant="outline" size="sm" className="w-full border-slate-800 hover:border-cyan-500/40 flex items-center justify-center gap-1.5 text-xs">
                       <Eye className="size-3.5" />
                       <span>View Course Page</span>
                     </Button>
