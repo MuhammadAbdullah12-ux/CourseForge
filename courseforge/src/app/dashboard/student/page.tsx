@@ -1,8 +1,9 @@
 import React from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
+import { syncUserWithDatabase } from "@/lib/user-sync";
 import { formatInstructorName } from "@/lib/formatters";
 import { UnenrollButton } from "@/components/unenroll-button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -11,16 +12,27 @@ import { Badge } from "@/components/ui/badge";
 import { GraduationCap, BookOpen, Award, Trophy, PlayCircle, BarChart3 } from "lucide-react";
 
 export default async function StudentDashboardPage() {
-  const { userId } = await auth();
+  const clerkUser = await currentUser();
 
   // 1. Redirect unauthenticated visitors to sign-in
-  if (!userId) {
+  if (!clerkUser) {
     redirect("/sign-in?redirect_url=/dashboard/student");
   }
 
-  // 2. Safely resolve User from Supabase PostgreSQL with enrollments & quizAttempts
-  let dbUser = await prisma.user.findUnique({
-    where: { clerkId: userId },
+  const userId = clerkUser.id;
+  const primaryEmail = clerkUser.emailAddresses[0]?.emailAddress || `${userId}@placeholder.com`;
+
+  // 2. Ensure user exists in database without throwing unique constraint errors
+  await syncUserWithDatabase("STUDENT");
+
+  // 3. Resolve User from Supabase PostgreSQL with enrollments & quizAttempts
+  const dbUser = await prisma.user.findFirst({
+    where: {
+      OR: [
+        { clerkId: userId },
+        { email: primaryEmail },
+      ],
+    },
     include: {
       enrollments: {
         include: {
@@ -59,50 +71,8 @@ export default async function StudentDashboardPage() {
     redirect("/dashboard/instructor");
   }
 
-  // Fallback lazy database provisioning
-  if (!dbUser) {
-    dbUser = await prisma.user.create({
-      data: {
-        clerkId: userId,
-        email: `${userId}@placeholder.com`,
-        role: "STUDENT",
-      },
-      include: {
-        enrollments: {
-          include: {
-            course: {
-              include: {
-                instructor: true,
-                lessons: {
-                  orderBy: {
-                    order: "asc",
-                  },
-                },
-              },
-            },
-          },
-          orderBy: {
-            createdAt: "desc",
-          },
-        },
-        quizAttempts: {
-          include: {
-            lesson: {
-              include: {
-                course: true,
-              },
-            },
-          },
-          orderBy: {
-            createdAt: "desc",
-          },
-        },
-      },
-    });
-  }
-
-  const enrollments = dbUser.enrollments || [];
-  const quizAttempts = dbUser.quizAttempts || [];
+  const enrollments = dbUser?.enrollments || [];
+  const quizAttempts = dbUser?.quizAttempts || [];
 
   // Calculate student progress metrics
   const totalEnrolled = enrollments.length;

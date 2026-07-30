@@ -1,46 +1,51 @@
 "use server";
 
-import { auth, clerkClient } from "@clerk/nextjs/server";
+import { auth, clerkClient, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { syncUserWithDatabase } from "@/lib/user-sync";
 
 export async function setUserRoleAction(role: "STUDENT" | "INSTRUCTOR" | "ADMIN") {
-  const { userId } = await auth();
+  const clerkUser = await currentUser();
 
-  if (!userId) {
+  if (!clerkUser) {
     redirect("/sign-in");
   }
 
-  // 1. Fetch user from Clerk SDK to get primary email
-  const client = await clerkClient();
-  const clerkUser = await client.users.getUser(userId);
-
+  const userId = clerkUser.id;
   const primaryEmail = clerkUser.emailAddresses[0]?.emailAddress || `${userId}@placeholder.com`;
 
-  // 2. Upsert user in Supabase PostgreSQL database via Prisma
-  await prisma.user.upsert({
-    where: { clerkId: userId },
-    update: { role },
-    create: {
-      clerkId: userId,
-      email: primaryEmail,
-      role,
-    },
-  });
+  // 1. Safely sync user in database
+  const dbUser = await syncUserWithDatabase();
+
+  // 2. Strict Role Protection Matrix:
+  // If user is a STUDENT in database, prevent elevating to INSTRUCTOR/ADMIN under a Student account
+  if (dbUser?.role === "STUDENT" && role !== "STUDENT") {
+    redirect(`/sign-in?redirect_url=/dashboard/${role.toLowerCase()}`);
+  }
+
+  // Only update database role if user was unassigned or ADMIN super-user
+  if (dbUser && dbUser.role !== role && dbUser.role !== "STUDENT") {
+    await prisma.user.update({
+      where: { id: dbUser.id },
+      data: { role },
+    });
+  }
 
   // 3. Sync role to Clerk public metadata
+  const client = await clerkClient();
   await client.users.updateUserMetadata(userId, {
     publicMetadata: {
       role,
     },
   });
 
-  // 4. Revalidate root layout cache so Navbar updates instantly
+  // 4. Revalidate cache
   revalidatePath("/", "layout");
   revalidatePath("/select-role");
 
-  // 5. Redirect based on chosen role
+  // 5. Redirect to destination dashboard
   if (role === "ADMIN") {
     redirect("/dashboard/admin");
   } else if (role === "INSTRUCTOR") {
