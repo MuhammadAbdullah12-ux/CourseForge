@@ -122,11 +122,48 @@ export async function enrollInCourseAction(courseId: string) {
     // 4. Purge stale route caches across layouts & dynamic pages on Vercel
     revalidatePath("/courses", "layout");
     revalidatePath(`/courses/${courseId}`, "page");
-    revalidatePath("/dashboard/instructor", "layout");
+    revalidatePath("/dashboard/student", "layout");
   } catch (error) {
     console.error("Error executing enrollInCourseAction:", error);
   }
 
   // 5. Redirect back to the course details page with ?enrolled=true to force client router cache refresh
   redirect(`/courses/${courseId}?enrolled=true`);
+}
+
+/**
+ * Server Action for Student Course Unenrollment
+ */
+export async function unenrollFromCourseAction(courseId: string) {
+  if (!courseId) {
+    throw new Error("Course ID is required for unenrollment.");
+  }
+
+  const { userId } = await auth();
+  if (!userId) {
+    redirect("/sign-in");
+  }
+
+  try {
+    const dbUser = await prisma.user.findUnique({
+      where: { clerkId: userId },
+    });
+
+    if (dbUser) {
+      await prisma.enrollment.deleteMany({
+        where: {
+          userId: dbUser.id,
+          courseId: courseId,
+        },
+      });
+    }
+
+    revalidatePath("/courses", "layout");
+    revalidatePath(`/courses/${courseId}`, "page");
+    revalidatePath("/dashboard/student", "layout");
+  } catch (error) {
+    console.error("Error executing unenrollFromCourseAction:", error);
+  }
+
+  redirect(`/dashboard/student?unenrolled=true`);
 }

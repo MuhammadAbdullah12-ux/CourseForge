@@ -1,11 +1,20 @@
 import React from "react";
+import { redirect } from "next/navigation";
+import { auth } from "@clerk/nextjs/server";
 import { setUserRoleAction } from "@/app/actions/user-actions";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { GraduationCap, Briefcase, ShieldCheck, Sparkles, CheckCircle2, ArrowRight } from "lucide-react";
 
-export default function SelectRolePage() {
+export default async function SelectRolePage() {
+  // 1. Enforce Server-Side Clerk Authentication Guard
+  const { userId } = await auth();
+
+  if (!userId) {
+    redirect("/sign-in?redirect_url=/select-role");
+  }
+
   const selectStudentRole = setUserRoleAction.bind(null, "STUDENT");
   const selectInstructorRole = setUserRoleAction.bind(null, "INSTRUCTOR");
   const selectAdminRole = setUserRoleAction.bind(null, "ADMIN");
@@ -17,13 +26,13 @@ export default function SelectRolePage() {
       <div className="text-center max-w-2xl mx-auto mb-12 space-y-3">
         <Badge className="bg-emerald-500/15 text-emerald-400 border border-emerald-500/20 px-3 py-1 text-xs rounded-full inline-flex items-center gap-1">
           <Sparkles className="size-3.5 text-emerald-400" />
-          <span>Interactive Onboarding & Role Switcher</span>
+          <span>Authenticated Role Selection</span>
         </Badge>
         <h1 className="text-3xl md:text-5xl font-extrabold text-slate-100 tracking-tight">
           Choose Your Access Mode on <span className="text-emerald-400">CourseForge</span>
         </h1>
         <p className="text-slate-400 text-sm md:text-base leading-relaxed">
-          Select your primary access mode below. You can switch roles at any time from your header navigation bar.
+          Select your access mode below to enter your dedicated role workspace. You can switch roles at any time from your header navigation bar.
         </p>
       </div>
 
@@ -63,7 +72,7 @@ export default function SelectRolePage() {
 
           <div className="p-6 pt-0 relative z-10">
             <form action={selectStudentRole}>
-              <Button type="submit" variant="brand" className="w-full h-10 text-xs flex items-center justify-center gap-2">
+              <Button type="submit" variant="brand" className="w-full h-10 text-xs flex items-center justify-center gap-2 font-bold">
                 <span>Continue as Student</span>
                 <ArrowRight className="size-3.5" />
               </Button>

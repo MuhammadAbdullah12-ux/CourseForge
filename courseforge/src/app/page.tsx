@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Sparkles, BookOpen, Bot, ShieldCheck, Database, Zap, ArrowRight, GraduationCap, Briefcase } from "lucide-react";
+import { Sparkles, BookOpen, Bot, ShieldCheck, Database, Zap, ArrowRight, GraduationCap, Briefcase, Lock } from "lucide-react";
 
 export default function Home() {
   return (
@@ -31,21 +31,22 @@ export default function Home() {
 
         {/* Hero Subtitle */}
         <p className="text-slate-400 text-base md:text-xl max-w-2xl mt-6 leading-relaxed">
-          CourseForge is an adaptive platform that connects learners with expert instructors. Study structured courses and solve doubts instantly with lesson-scoped AI tutors.
+          CourseForge is an adaptive platform connecting students with expert instructors. Study structured courses and solve doubts instantly with lesson-scoped AI tutors.
         </p>
 
-        {/* Action Buttons */}
+        {/* AUTHENTICATION-GATED HERO ACTION BUTTONS */}
         <div className="flex flex-col sm:flex-row gap-4 mt-8 w-full sm:w-auto">
-          <Link href="/courses">
+          <Link href="/select-role">
             <Button variant="brand" className="w-full sm:w-auto h-12 px-8 text-base shadow-xl shadow-emerald-500/20 flex items-center justify-center gap-2">
-              <BookOpen className="size-5" />
-              <span>Browse Courses</span>
+              <GraduationCap className="size-5" />
+              <span>Get Started / Select Role</span>
+              <ArrowRight className="size-4" />
             </Button>
           </Link>
-          <Link href="/select-role">
+          <Link href="/sign-in">
             <Button variant="outline" className="w-full sm:w-auto h-12 px-8 text-base border-slate-700 text-slate-200 hover:text-white hover:bg-slate-800 flex items-center justify-center gap-2">
-              <span>Choose Your Role</span>
-              <ArrowRight className="size-4 text-emerald-400" />
+              <Lock className="size-4 text-emerald-400" />
+              <span>Sign In to Access</span>
             </Button>
           </Link>
         </div>
@@ -98,7 +99,7 @@ export default function Home() {
               </div>
               <h3 className="text-lg font-bold text-slate-100">Role-Based Workspaces</h3>
               <p className="text-xs text-slate-400 leading-relaxed">
-                Strict Edge middleware protecting instructor management portals and student learning paths.
+                Strict Edge middleware protecting instructor management portals, student learning paths, and admin command centers.
               </p>
             </CardContent>
           </Card>
@@ -130,21 +131,28 @@ export default function Home() {
               Ready to Start Your Journey?
             </h2>
             <p className="text-slate-400 text-sm leading-relaxed">
-              Choose whether you want to learn as a student or create courses as an instructor. You can switch modes anytime.
+              Choose whether you want to learn as a student, create courses as an instructor, or manage platform users as an admin. You can switch modes anytime.
             </p>
           </div>
 
+          {/* ALL 3 ROLE BUTTONS */}
           <div className="flex flex-col sm:flex-row gap-3 shrink-0 w-full md:w-auto">
             <Link href="/select-role">
-              <Button variant="brand" className="w-full sm:w-auto h-11 px-6 flex items-center justify-center gap-2">
+              <Button variant="brand" className="w-full sm:w-auto h-11 px-5 flex items-center justify-center gap-2">
                 <GraduationCap className="size-4" />
-                <span>Student Portal</span>
+                <span>Student Mode</span>
               </Button>
             </Link>
             <Link href="/select-role">
-              <Button variant="outline" className="w-full sm:w-auto h-11 px-6 border-slate-700 text-slate-200 hover:text-white flex items-center justify-center gap-2">
-                <Briefcase className="size-4 text-emerald-400" />
-                <span>Instructor Portal</span>
+              <Button className="w-full sm:w-auto h-11 px-5 bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 hover:bg-cyan-500 hover:text-slate-950 font-bold flex items-center justify-center gap-2">
+                <Briefcase className="size-4" />
+                <span>Instructor Mode</span>
+              </Button>
+            </Link>
+            <Link href="/select-role">
+              <Button className="w-full sm:w-auto h-11 px-5 bg-purple-500/15 border border-purple-500/30 text-purple-300 hover:bg-purple-500 hover:text-slate-950 font-bold flex items-center justify-center gap-2">
+                <ShieldCheck className="size-4" />
+                <span>Admin Mode</span>
               </Button>
             </Link>
           </div>

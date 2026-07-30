@@ -1,30 +1,26 @@
-import React from 'react';
-import Link from 'next/link';
-import { notFound } from "next/navigation";
-import { prisma } from "@/lib/prisma";
+import React from "react";
+import Link from "next/link";
+import { notFound, redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
+import { prisma } from "@/lib/prisma";
 import { enrollInCourseAction } from "@/app/actions/course-actions";
+import { UnenrollButton } from "@/components/unenroll-button";
 import { AITutorWidget } from "@/components/ai-tutor-widget";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, User, Calendar, BookOpen, Clock, ShieldCheck, CheckCircle2, Award, PlayCircle } from "lucide-react";
+import { BookOpen, User, Calendar, Clock, ShieldCheck, PlayCircle, ArrowLeft, CheckCircle2 } from "lucide-react";
 
-interface PageProps {
+interface CourseDetailsPageProps {
   params: Promise<{
     courseId: string;
   }>;
-  searchParams?: Promise<{
-    enrolled?: string;
-  }>;
 }
 
-export default async function CourseDetailPage({ params, searchParams }: PageProps) {
+export default async function CourseDetailsPage({ params }: CourseDetailsPageProps) {
   const { courseId } = await params;
-  const resolvedSearchParams = searchParams ? await searchParams : {};
-  const isEnrolledParam = resolvedSearchParams.enrolled === "true";
 
-  // 1. Fetch course from Supabase database, including instructor and ordered lessons
+  // Fetch authentic relational course details & lessons from Supabase cloud database
   const course = await prisma.course.findUnique({
     where: {
       id: courseId,
@@ -43,17 +39,17 @@ export default async function CourseDetailPage({ params, searchParams }: PagePro
     notFound();
   }
 
-  // 2. Check enrollment status
+  // Check if current authenticated student is already enrolled in this course
   const { userId } = await auth();
-  let isEnrolled = isEnrolledParam;
+  let isEnrolled = false;
 
-  if (userId && !isEnrolled) {
+  if (userId) {
     const dbUser = await prisma.user.findUnique({
       where: { clerkId: userId },
     });
 
     if (dbUser) {
-      const enrollment = await prisma.enrollment.findUnique({
+      const existingEnrollment = await prisma.enrollment.findUnique({
         where: {
           userId_courseId: {
             userId: dbUser.id,
@@ -62,15 +58,18 @@ export default async function CourseDetailPage({ params, searchParams }: PagePro
         },
       });
 
-      isEnrolled = !!enrollment;
+      if (existingEnrollment) {
+        isEnrolled = true;
+      }
     }
   }
 
-  // Bind course ID to Server Action
+  // Pre-bind Server Action to current course ID
   const enrollAction = enrollInCourseAction.bind(null, course.id);
 
   const formattedDate = new Date(course.createdAt).toLocaleDateString("en-US", {
     month: "long",
+    day: "numeric",
     year: "numeric",
   });
 
@@ -78,39 +77,36 @@ export default async function CourseDetailPage({ params, searchParams }: PagePro
   const firstLesson = course.lessons[0];
 
   return (
-    <main className="max-w-5xl mx-auto px-6 py-10 md:py-16 font-sans text-slate-200">
+    <main className="max-w-5xl mx-auto px-6 py-10 md:py-16 font-sans text-slate-100">
       
-      {/* Back Button */}
-      <Link href="/courses" className="inline-flex items-center gap-1 text-sm text-slate-400 hover:text-emerald-400 transition-colors mb-8">
-        <ArrowLeft className="size-4" />
-        <span>Back to Catalog</span>
+      {/* Back to Catalog Breadcrumb */}
+      <Link href="/courses" className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-emerald-400 mb-6 transition-colors">
+        <ArrowLeft className="size-3.5" />
+        <span>Back to Course Catalog</span>
       </Link>
 
-      {/* Main Grid: 2/3 Content on Left, 1/3 Sidebar Card on Right */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        {/* Left Column: Course Main Details & Live AI Tutor */}
-        <div className="lg:col-span-2 space-y-8">
-          <div className="space-y-4">
-            <div className="flex gap-2">
-              <Badge className="bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">
-                Self-Paced
+        {/* Left Column: Course Main Info */}
+        <div className="lg:col-span-2 space-y-6">
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Badge className="bg-emerald-500/15 text-emerald-400 border border-emerald-500/20 px-3 py-1 text-xs rounded-full">
+                Interactive Learning Track
               </Badge>
-              <Badge variant="secondary" className="bg-slate-800 text-slate-300">
-                Beginner Friendly
-              </Badge>
-              <Badge variant="secondary" className="bg-slate-800 text-slate-300 flex items-center gap-1">
-                <Award className="size-3 text-emerald-400" />
-                <span>Certificate Included</span>
-              </Badge>
+              {isEnrolled && (
+                <Badge className="bg-emerald-500 text-slate-950 font-bold px-2.5 py-0.5 text-xs rounded-full flex items-center gap-1">
+                  <CheckCircle2 className="size-3" />
+                  <span>Enrolled</span>
+                </Badge>
+              )}
             </div>
-            
-            <h1 className="text-3xl md:text-4xl font-extrabold text-slate-100 tracking-tight leading-tight">
+
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-100 tracking-tight leading-tight">
               {course.title}
             </h1>
 
-            {/* Metadata Bar */}
-            <div className="flex flex-wrap gap-4 text-sm text-slate-400 pt-2 pb-4 border-b border-slate-800">
+            <div className="flex flex-wrap items-center gap-4 text-xs text-slate-400 pt-1 border-b border-slate-800 pb-4">
               <span className="flex items-center gap-1.5">
                 <User className="size-4 text-emerald-400" />
                 <span>Instructor: <strong className="capitalize">{instructorName}</strong></span>
@@ -194,6 +190,7 @@ export default async function CourseDetailPage({ params, searchParams }: PagePro
                       </Button>
                     </Link>
                   )}
+                  <UnenrollButton courseId={course.id} className="w-full justify-center h-9" />
                 </div>
               ) : (
                 <form action={enrollAction} className="w-full">

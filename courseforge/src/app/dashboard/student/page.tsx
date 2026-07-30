@@ -3,10 +3,11 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
+import { UnenrollButton } from "@/components/unenroll-button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { GraduationCap, BookOpen, Award, Trophy, Clock, PlayCircle, BarChart3 } from "lucide-react";
+import { GraduationCap, BookOpen, Award, Trophy, PlayCircle, BarChart3 } from "lucide-react";
 
 export default async function StudentDashboardPage() {
   const { userId } = await auth();
@@ -245,21 +246,25 @@ export default async function StudentDashboardPage() {
                         </p>
                       </div>
 
-                      {/* Continue Learning CTA */}
-                      {firstLesson ? (
-                        <Link href={`/courses/${course.id}/lessons/${firstLesson.id}`} className="shrink-0 w-full sm:w-auto">
-                          <Button variant="brand" size="sm" className="w-full flex items-center gap-1.5 text-xs">
-                            <PlayCircle className="size-4" />
-                            <span>Continue Learning</span>
-                          </Button>
-                        </Link>
-                      ) : (
-                        <Link href={`/courses/${course.id}`} className="shrink-0 w-full sm:w-auto">
-                          <Button variant="outline" size="sm" className="w-full text-xs border-slate-700">
-                            View Syllabus
-                          </Button>
-                        </Link>
-                      )}
+                      {/* Continue Learning CTA & Unenroll Button */}
+                      <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto justify-end">
+                        <UnenrollButton courseId={course.id} />
+
+                        {firstLesson ? (
+                          <Link href={`/courses/${course.id}/lessons/${firstLesson.id}`}>
+                            <Button variant="brand" size="sm" className="flex items-center gap-1.5 text-xs">
+                              <PlayCircle className="size-4" />
+                              <span>Continue Learning</span>
+                            </Button>
+                          </Link>
+                        ) : (
+                          <Link href={`/courses/${course.id}`}>
+                            <Button variant="outline" size="sm" className="text-xs border-slate-700">
+                              View Syllabus
+                            </Button>
+                          </Link>
+                        )}
+                      </div>
                     </div>
                   </Card>
                 );

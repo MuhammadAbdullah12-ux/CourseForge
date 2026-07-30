@@ -4,17 +4,17 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserButton } from "@clerk/nextjs";
+import { NavbarNotifications } from "./navbar-notifications";
+import { NavbarQuickSearch } from "./navbar-quick-search";
 import {
   Menu,
   X,
-  Home,
   BookOpen,
   GraduationCap,
   ShieldCheck,
   Briefcase,
   RefreshCw,
   PlusCircle,
-  Users,
   BarChart3,
   BookMarked,
   UserCog,
@@ -51,7 +51,7 @@ export function Navbar({ userId, userRole }: NavbarProps) {
     <header className="border-b border-slate-800/80 bg-slate-950/75 backdrop-blur-xl sticky top-0 z-50 transition-all">
       <nav className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
         
-        {/* Logo / Brand Name */}
+        {/* Logo / Brand Name (Clicking logo goes Home) */}
         <Link href="/" className="font-extrabold text-xl text-emerald-400 tracking-tight hover:scale-105 hover:opacity-95 transition-all flex items-center gap-2">
           <span className="bg-emerald-500/20 text-emerald-400 p-1.5 rounded-xl text-xs border border-emerald-500/30 shadow-inner">
             CF
@@ -59,22 +59,19 @@ export function Navbar({ userId, userRole }: NavbarProps) {
           <span>CourseForge</span>
         </Link>
         
-        {/* Desktop Navigation Links (DEDICATED URL WEBPAGES PER LINK) */}
+        {/* Desktop Navigation Links */}
         <div className="hidden md:flex gap-2 sm:gap-3 items-center">
-          
-          <Link 
-            href="/" 
-            className="px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-900 transition-all"
-          >
-            Home
-          </Link>
 
-          {/* 🟩 STUDENT DEDICATED WEBPAGE LINKS */}
+          {/* 🟩 STUDENT DEDICATED LINKS */}
           {isStudent && (
             <>
               <Link 
                 href="/courses" 
-                className="px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium text-slate-300 hover:text-emerald-400 hover:bg-slate-900 transition-all flex items-center gap-1.5"
+                className={`px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium transition-all flex items-center gap-1.5 ${
+                  pathname === "/courses"
+                    ? "text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 font-bold"
+                    : "text-slate-300 hover:text-emerald-400 hover:bg-slate-900"
+                }`}
               >
                 <BookOpen className="size-3.5 text-emerald-400" />
                 <span>Courses Catalog</span>
@@ -84,7 +81,11 @@ export function Navbar({ userId, userRole }: NavbarProps) {
                 <>
                   <Link 
                     href="/dashboard/student" 
-                    className="px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium text-slate-300 hover:text-emerald-400 hover:bg-slate-900 transition-all flex items-center gap-1.5"
+                    className={`px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium transition-all flex items-center gap-1.5 ${
+                      pathname === "/dashboard/student"
+                        ? "text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 font-bold"
+                        : "text-slate-300 hover:text-emerald-400 hover:bg-slate-900"
+                    }`}
                   >
                     <BookMarked className="size-3.5 text-emerald-400" />
                     <span>My Enrolled Courses</span>
@@ -102,12 +103,16 @@ export function Navbar({ userId, userRole }: NavbarProps) {
             </>
           )}
 
-          {/* 🟦 INSTRUCTOR DEDICATED WEBPAGE LINKS */}
+          {/* 🟦 INSTRUCTOR DEDICATED LINKS */}
           {isInstructor && (
             <>
               <Link 
                 href="/dashboard/instructor/courses" 
-                className="px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium text-slate-300 hover:text-cyan-400 hover:bg-slate-900 transition-all flex items-center gap-1.5"
+                className={`px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium transition-all flex items-center gap-1.5 ${
+                  pathname === "/dashboard/instructor/courses"
+                    ? "text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 font-bold"
+                    : "text-slate-300 hover:text-cyan-400 hover:bg-slate-900"
+                }`}
               >
                 <BookOpen className="size-3.5 text-cyan-400" />
                 <span>My Published Courses</span>
@@ -115,7 +120,11 @@ export function Navbar({ userId, userRole }: NavbarProps) {
 
               <Link 
                 href="/dashboard/instructor/courses/new" 
-                className="px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium text-slate-300 hover:text-cyan-400 hover:bg-slate-900 transition-all flex items-center gap-1.5"
+                className={`px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium transition-all flex items-center gap-1.5 ${
+                  pathname === "/dashboard/instructor/courses/new"
+                    ? "text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 font-bold"
+                    : "text-slate-300 hover:text-cyan-400 hover:bg-slate-900"
+                }`}
               >
                 <PlusCircle className="size-3.5 text-cyan-400" />
                 <span>+ Create AI Course</span>
@@ -123,7 +132,11 @@ export function Navbar({ userId, userRole }: NavbarProps) {
 
               <Link 
                 href="/dashboard/instructor/analytics" 
-                className="px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium text-slate-300 hover:text-cyan-400 hover:bg-slate-900 transition-all flex items-center gap-1.5"
+                className={`px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium transition-all flex items-center gap-1.5 ${
+                  pathname === "/dashboard/instructor/analytics"
+                    ? "text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 font-bold"
+                    : "text-slate-300 hover:text-cyan-400 hover:bg-slate-900"
+                }`}
               >
                 <BarChart3 className="size-3.5 text-cyan-400" />
                 <span>Analytics</span>
@@ -141,12 +154,16 @@ export function Navbar({ userId, userRole }: NavbarProps) {
             </>
           )}
 
-          {/* 🟪 ADMIN DEDICATED WEBPAGE LINKS */}
+          {/* 🟪 ADMIN DEDICATED LINKS */}
           {isAdmin && (
             <>
               <Link 
                 href="/dashboard/admin/users" 
-                className="px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium text-slate-300 hover:text-purple-400 hover:bg-slate-900 transition-all flex items-center gap-1.5"
+                className={`px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium transition-all flex items-center gap-1.5 ${
+                  pathname === "/dashboard/admin/users"
+                    ? "text-purple-400 bg-purple-500/10 border border-purple-500/20 font-bold"
+                    : "text-slate-300 hover:text-purple-400 hover:bg-slate-900"
+                }`}
               >
                 <UserCog className="size-3.5 text-purple-400" />
                 <span>User Directory</span>
@@ -154,7 +171,11 @@ export function Navbar({ userId, userRole }: NavbarProps) {
 
               <Link 
                 href="/dashboard/admin/courses" 
-                className="px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium text-slate-300 hover:text-purple-400 hover:bg-slate-900 transition-all flex items-center gap-1.5"
+                className={`px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium transition-all flex items-center gap-1.5 ${
+                  pathname === "/dashboard/admin/courses"
+                    ? "text-purple-400 bg-purple-500/10 border border-purple-500/20 font-bold"
+                    : "text-slate-300 hover:text-purple-400 hover:bg-slate-900"
+                }`}
               >
                 <Sliders className="size-3.5 text-purple-400" />
                 <span>Course Moderation</span>
@@ -162,7 +183,11 @@ export function Navbar({ userId, userRole }: NavbarProps) {
 
               <Link 
                 href="/dashboard/admin/telemetry" 
-                className="px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium text-slate-300 hover:text-purple-400 hover:bg-slate-900 transition-all flex items-center gap-1.5"
+                className={`px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium transition-all flex items-center gap-1.5 ${
+                  pathname === "/dashboard/admin/telemetry"
+                    ? "text-purple-400 bg-purple-500/10 border border-purple-500/20 font-bold"
+                    : "text-slate-300 hover:text-purple-400 hover:bg-slate-900"
+                }`}
               >
                 <BarChart3 className="size-3.5 text-purple-400" />
                 <span>Telemetry</span>
@@ -179,6 +204,12 @@ export function Navbar({ userId, userRole }: NavbarProps) {
               )}
             </>
           )}
+
+          {/* ⚡ QUICK SEARCH (⌘K) */}
+          <NavbarQuickSearch />
+
+          {/* 🔔 NOTIFICATIONS CENTER */}
+          {userId && <NavbarNotifications />}
 
           {/* ACTIONABLE "SWITCH MODE 🔄" BUTTON */}
           <Link 
@@ -221,6 +252,8 @@ export function Navbar({ userId, userRole }: NavbarProps) {
 
         {/* Mobile Hamburger Toggle Button */}
         <div className="flex items-center gap-3 md:hidden">
+          {userId && <NavbarNotifications />}
+
           {userId && (
             <div className="flex items-center">
               <UserButton />
@@ -242,16 +275,29 @@ export function Navbar({ userId, userRole }: NavbarProps) {
       {/* Mobile Menu Dropdown Drawer */}
       {isMobileMenuOpen && (
         <div className="md:hidden border-b border-slate-800 bg-slate-950/95 backdrop-blur-2xl px-6 py-4 space-y-3 shadow-2xl animate-in slide-in-from-top-2">
-          <Link
-            href="/"
-            onClick={() => setIsMobileMenuOpen(false)}
-            className="flex items-center gap-2.5 p-2.5 rounded-xl text-sm font-medium text-slate-200 hover:bg-slate-900 hover:text-emerald-400 transition-colors"
-          >
-            <Home className="size-4 text-emerald-400" />
-            <span>Home</span>
-          </Link>
+          {/* Student Mobile Links */}
+          {isStudent && (
+            <>
+              <Link
+                href="/courses"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center gap-2.5 p-2.5 rounded-xl text-sm font-medium text-slate-200 hover:bg-slate-900 hover:text-emerald-400 transition-colors"
+              >
+                <BookOpen className="size-4 text-emerald-400" />
+                <span>Courses Catalog</span>
+              </Link>
+              <Link
+                href="/dashboard/student"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center gap-2.5 p-2.5 rounded-xl text-sm font-bold text-emerald-300 bg-emerald-500/15 border border-emerald-500/30"
+              >
+                <GraduationCap className="size-4 text-emerald-400" />
+                <span>Student Dashboard</span>
+              </Link>
+            </>
+          )}
 
-          {/* Instructor Dedicated Mobile Links */}
+          {/* Instructor Mobile Links */}
           {isInstructor && (
             <>
               <Link
@@ -262,7 +308,6 @@ export function Navbar({ userId, userRole }: NavbarProps) {
                 <BookOpen className="size-4 text-cyan-400" />
                 <span>My Published Courses</span>
               </Link>
-
               <Link
                 href="/dashboard/instructor/courses/new"
                 onClick={() => setIsMobileMenuOpen(false)}
@@ -271,16 +316,6 @@ export function Navbar({ userId, userRole }: NavbarProps) {
                 <PlusCircle className="size-4 text-cyan-400" />
                 <span>+ Create AI Course</span>
               </Link>
-
-              <Link
-                href="/dashboard/instructor/analytics"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="flex items-center gap-2.5 p-2.5 rounded-xl text-sm font-medium text-slate-200 hover:bg-slate-900 hover:text-cyan-400 transition-colors"
-              >
-                <BarChart3 className="size-4 text-cyan-400" />
-                <span>Analytics Suite</span>
-              </Link>
-
               <Link
                 href="/dashboard/instructor"
                 onClick={() => setIsMobileMenuOpen(false)}
@@ -303,7 +338,6 @@ export function Navbar({ userId, userRole }: NavbarProps) {
                 <UserCog className="size-4 text-purple-400" />
                 <span>User Directory</span>
               </Link>
-
               <Link
                 href="/dashboard/admin"
                 onClick={() => setIsMobileMenuOpen(false)}
@@ -311,28 +345,6 @@ export function Navbar({ userId, userRole }: NavbarProps) {
               >
                 <ShieldCheck className="size-4 text-purple-400" />
                 <span>Admin Portal</span>
-              </Link>
-            </>
-          )}
-
-          {/* Student Mobile Links */}
-          {isStudent && (
-            <>
-              <Link
-                href="/courses"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="flex items-center gap-2.5 p-2.5 rounded-xl text-sm font-medium text-slate-200 hover:bg-slate-900 hover:text-emerald-400 transition-colors"
-              >
-                <BookOpen className="size-4 text-emerald-400" />
-                <span>Courses Catalog</span>
-              </Link>
-              <Link
-                href="/dashboard/student"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="flex items-center gap-2.5 p-2.5 rounded-xl text-sm font-bold text-emerald-300 bg-emerald-500/15 border border-emerald-500/30"
-              >
-                <GraduationCap className="size-4 text-emerald-400" />
-                <span>Student Dashboard</span>
               </Link>
             </>
           )}
