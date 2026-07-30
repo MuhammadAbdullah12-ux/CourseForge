@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { AITutorWidget } from "@/components/ai-tutor-widget";
 import { AIQuizWidget } from "@/components/ai-quiz-widget";
+import { LiveCodeSandbox } from "@/components/live-code-sandbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -72,7 +73,7 @@ export default async function LessonWorkspacePage({ params }: PageProps) {
       {/* Main Dual-Pane Classroom Grid: 2/3 Content Reader on Left, 1/3 AI Tutor Sidebar on Right */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        {/* Left Pane (2/3): Lesson Reader & AI Quiz Widget */}
+        {/* Left Pane (2/3): Lesson Reader, Live Sandbox & AI Quiz Widget */}
         <div className="lg:col-span-2 space-y-6">
           
           <div className="space-y-2">
@@ -100,6 +101,9 @@ export default async function LessonWorkspacePage({ params }: PageProps) {
               </div>
             </CardContent>
           </Card>
+
+          {/* Live Executable Code Sandbox Component */}
+          <LiveCodeSandbox lessonTitle={lesson.title} />
 
           {/* Interactive AI Knowledge Check Quiz Component */}
           <AIQuizWidget lessonId={lesson.id} lessonTitle={lesson.title} />
