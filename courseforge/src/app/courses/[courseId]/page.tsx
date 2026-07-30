@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
+import { formatInstructorName } from "@/lib/formatters";
 import { enrollInCourseAction } from "@/app/actions/course-actions";
 import { UnenrollButton } from "@/components/unenroll-button";
 import { AITutorWidget } from "@/components/ai-tutor-widget";
@@ -73,7 +74,7 @@ export default async function CourseDetailsPage({ params }: CourseDetailsPagePro
     year: "numeric",
   });
 
-  const instructorName = course.instructor.email.split("@")[0];
+  const instructorName = formatInstructorName(course.instructor.email);
   const firstLesson = course.lessons[0];
 
   return (
@@ -109,7 +110,7 @@ export default async function CourseDetailsPage({ params }: CourseDetailsPagePro
             <div className="flex flex-wrap items-center gap-4 text-xs text-slate-400 pt-1 border-b border-slate-800 pb-4">
               <span className="flex items-center gap-1.5">
                 <User className="size-4 text-emerald-400" />
-                <span>Instructor: <strong className="capitalize">{instructorName}</strong></span>
+                <span>Instructor: <strong className="text-slate-200">{instructorName}</strong></span>
               </span>
               <span className="flex items-center gap-1.5">
                 <Calendar className="size-4 text-emerald-400" />

@@ -30,8 +30,9 @@ export function Navbar({ userId, userRole }: NavbarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
 
-  // Hide Navbar completely on onboarding screens (Select Role, Sign In, Sign Up)
+  // SUPPRESS NAVBAR COMPLETELY on Home page (/), Select Role (/select-role), Sign In (/sign-in), and Sign Up (/sign-up)
   if (
+    pathname === "/" ||
     pathname === "/select-role" ||
     pathname.startsWith("/sign-in") ||
     pathname.startsWith("/sign-up")
@@ -211,10 +212,10 @@ export function Navbar({ userId, userRole }: NavbarProps) {
           {/* 🔔 NOTIFICATIONS CENTER */}
           {userId && <NavbarNotifications />}
 
-          {/* ACTIONABLE "SWITCH MODE 🔄" BUTTON */}
+          {/* ACTIONABLE "SWITCH MODE 🔄" BUTTON (OPENS ROLES PAGE FIRST) */}
           <Link 
             href="/select-role" 
-            title="Switch between Student, Instructor, and Admin access modes"
+            title="Choose access mode among Student, Instructor, and Admin"
             className={`px-3 py-1.5 rounded-full text-xs font-semibold border hover:scale-105 transition-all duration-200 ease-out flex items-center gap-1.5 ${
               isAdmin
                 ? "bg-purple-500/10 text-purple-400 border-purple-500/30 hover:bg-purple-500 hover:text-slate-950"
@@ -352,7 +353,7 @@ export function Navbar({ userId, userRole }: NavbarProps) {
           <Link
             href="/select-role"
             onClick={() => setIsMobileMenuOpen(false)}
-            className={`flex items-center justify-between p-2.5 rounded-xl text-xs font-semibold border ${
+            className={`w-full flex items-center justify-between p-2.5 rounded-xl text-xs font-semibold border ${
               isAdmin
                 ? "bg-purple-500/10 text-purple-400 border-purple-500/30"
                 : isInstructor

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
+import { formatInstructorName } from "@/lib/formatters";
 import { UnenrollButton } from "@/components/unenroll-button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -224,7 +225,7 @@ export default async function StudentDashboardPage() {
               {enrollments.map((enrollment) => {
                 const course = enrollment.course;
                 const firstLesson = course.lessons[0];
-                const instructorName = course.instructor.email.split("@")[0];
+                const instructorName = formatInstructorName(course.instructor.email);
 
                 return (
                   <Card key={enrollment.id} className="border-slate-800 bg-slate-900/50 hover:bg-slate-900/80 transition-all p-5">
@@ -234,8 +235,8 @@ export default async function StudentDashboardPage() {
                           <Badge className="bg-emerald-500/15 text-emerald-400 border border-emerald-500/20 text-[10px]">
                             Enrolled Track
                           </Badge>
-                          <span className="text-[11px] text-slate-400 capitalize">
-                            Instructor: {instructorName}
+                          <span className="text-[11px] text-slate-400">
+                            Instructor: <strong className="text-slate-200">{instructorName}</strong>
                           </span>
                         </div>
                         <h3 className="text-base font-bold text-slate-100">

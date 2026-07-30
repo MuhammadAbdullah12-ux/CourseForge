@@ -8,31 +8,53 @@ import { Badge } from "@/components/ui/badge";
 import { GraduationCap, Briefcase, ShieldCheck, Sparkles, CheckCircle2, ArrowRight } from "lucide-react";
 
 export default async function SelectRolePage() {
-  // 1. Enforce Server-Side Clerk Authentication Guard
+  // Allow viewing the 3 Role Mode cards FIRST without blocking sign-in popups!
   const { userId } = await auth();
 
-  if (!userId) {
-    redirect("/sign-in?redirect_url=/select-role");
-  }
+  const handleStudentSelect = async () => {
+    "use server";
+    const { userId: currentUserId } = await auth();
+    if (!currentUserId) {
+      redirect("/sign-in?redirect_url=/dashboard/student");
+    }
+    await setUserRoleAction("STUDENT");
+  };
 
-  const selectStudentRole = setUserRoleAction.bind(null, "STUDENT");
-  const selectInstructorRole = setUserRoleAction.bind(null, "INSTRUCTOR");
-  const selectAdminRole = setUserRoleAction.bind(null, "ADMIN");
+  const handleInstructorSelect = async () => {
+    "use server";
+    const { userId: currentUserId } = await auth();
+    if (!currentUserId) {
+      redirect("/sign-in?redirect_url=/dashboard/instructor");
+    }
+    await setUserRoleAction("INSTRUCTOR");
+  };
+
+  const handleAdminSelect = async () => {
+    "use server";
+    const { userId: currentUserId } = await auth();
+    if (!currentUserId) {
+      redirect("/sign-in?redirect_url=/dashboard/admin");
+    }
+    await setUserRoleAction("ADMIN");
+  };
 
   return (
     <main className="max-w-6xl mx-auto px-6 py-12 md:py-20 font-sans text-slate-100 min-h-[85vh] flex flex-col justify-center">
       
       {/* Header Title Section */}
-      <div className="text-center max-w-2xl mx-auto mb-12 space-y-3">
-        <Badge className="bg-emerald-500/15 text-emerald-400 border border-emerald-500/20 px-3 py-1 text-xs rounded-full inline-flex items-center gap-1">
-          <Sparkles className="size-3.5 text-emerald-400" />
-          <span>Authenticated Role Selection</span>
-        </Badge>
+      <div className="text-center max-w-2xl mx-auto mb-10 space-y-3">
+        <div className="flex items-center justify-center gap-3">
+          <Badge className="bg-emerald-500/15 text-emerald-400 border border-emerald-500/20 px-3 py-1 text-xs rounded-full inline-flex items-center gap-1">
+            <Sparkles className="size-3.5 text-emerald-400" />
+            <span>Interactive Access Mode Selection</span>
+          </Badge>
+        </div>
+
         <h1 className="text-3xl md:text-5xl font-extrabold text-slate-100 tracking-tight">
           Choose Your Access Mode on <span className="text-emerald-400">CourseForge</span>
         </h1>
         <p className="text-slate-400 text-sm md:text-base leading-relaxed">
-          Select your access mode below to enter your dedicated role workspace. You can switch roles at any time from your header navigation bar.
+          Select your access mode below. You will be prompted to log into your specific role workspace once you make your choice.
         </p>
       </div>
 
@@ -71,7 +93,7 @@ export default async function SelectRolePage() {
           </CardContent>
 
           <div className="p-6 pt-0 relative z-10">
-            <form action={selectStudentRole}>
+            <form action={handleStudentSelect}>
               <Button type="submit" variant="brand" className="w-full h-10 text-xs flex items-center justify-center gap-2 font-bold">
                 <span>Continue as Student</span>
                 <ArrowRight className="size-3.5" />
@@ -112,7 +134,7 @@ export default async function SelectRolePage() {
           </CardContent>
 
           <div className="p-6 pt-0 relative z-10">
-            <form action={selectInstructorRole}>
+            <form action={handleInstructorSelect}>
               <Button
                 type="submit"
                 className="w-full h-10 text-xs flex items-center justify-center gap-2 bg-gradient-to-r from-cyan-500 via-cyan-400 to-teal-400 text-slate-950 font-extrabold hover:from-cyan-400 hover:to-teal-300"
@@ -158,7 +180,7 @@ export default async function SelectRolePage() {
           </CardContent>
 
           <div className="p-6 pt-0 relative z-10">
-            <form action={selectAdminRole}>
+            <form action={handleAdminSelect}>
               <Button type="submit" className="w-full h-10 text-xs flex items-center justify-center gap-2 bg-gradient-to-r from-purple-500 via-purple-400 to-indigo-400 text-slate-950 font-extrabold hover:from-purple-400 hover:to-indigo-300">
                 <span>Continue as Admin</span>
                 <ArrowRight className="size-3.5" />
