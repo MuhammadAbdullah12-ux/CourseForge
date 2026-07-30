@@ -1,210 +1,89 @@
-# 🚀 CourseForge
+# 🚀 CourseForge — Adaptive AI Learning & Course Management Platform
 
-> **An AI-Assisted, Next-Generation E-Learning Platform**  
-> Built with **Next.js 16** (App Router & Turbopack), **Tailwind CSS**, **Shadcn UI**, **Prisma v7 ORM**, **Supabase Cloud PostgreSQL**, and **Clerk Authentication**.
+[![Next.js 16](https://img.shields.io/badge/Next.js-16.2-emerald?style=for-the-badge&logo=nextdotjs)](https://nextjs.org/)
+[![Prisma 7](https://img.shields.io/badge/Prisma-7.9-blue?style=for-the-badge&logo=prisma)](https://prisma.io/)
+[![Google Gemini AI](https://img.shields.io/badge/Google_Gemini-2.5_Flash-orange?style=for-the-badge&logo=google)](https://ai.google.dev/)
+[![Supabase PostgreSQL](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?style=for-the-badge&logo=supabase)](https://supabase.com/)
+[![Clerk Auth](https://img.shields.io/badge/Clerk-Authentication-6C47FF?style=for-the-badge&logo=clerk)](https://clerk.com/)
+[![Tailwind CSS v4](https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4?style=for-the-badge&logo=tailwindcss)](https://tailwindcss.com/)
+[![Vercel Deployment](https://img.shields.io/badge/Vercel-Deployed-black?style=for-the-badge&logo=vercel)](https://course-forge-gamma.vercel.app)
 
-<p align="left">
-  <a href="https://course-forge-gamma.vercel.app"><img src="https://img.shields.io/badge/STATUS-ACTIVE_DEVELOPMENT-brightgreen?style=for-the-badge&logo=github" alt="Status" /></a>
-  <a href="https://nextjs.org"><img src="https://img.shields.io/badge/NEXT.JS-16.2-000000?style=for-the-badge&logo=next.js" alt="Next.js" /></a>
-  <a href="https://www.prisma.io"><img src="https://img.shields.io/badge/PRISMA-v7.9-2D3748?style=for-the-badge&logo=prisma" alt="Prisma" /></a>
-  <a href="https://supabase.com"><img src="https://img.shields.io/badge/SUPABASE-POSTGRESQL-3ECF8E?style=for-the-badge&logo=supabase" alt="Supabase" /></a>
-  <a href="https://clerk.com"><img src="https://img.shields.io/badge/CLERK-AUTH-6C47FF?style=for-the-badge&logo=clerk" alt="Clerk" /></a>
-  <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/TYPESCRIPT-5.0-3178C6?style=for-the-badge&logo=typescript" alt="TypeScript" /></a>
-  <a href="https://tailwindcss.com"><img src="https://img.shields.io/badge/TAILWIND-CSS-06B6D4?style=for-the-badge&logo=tailwindcss" alt="Tailwind" /></a>
-  <a href="https://vercel.com"><img src="https://img.shields.io/badge/VERCEL-DEPLOYED-000000?style=for-the-badge&logo=vercel" alt="Vercel" /></a>
-</p>
+CourseForge is an adaptive, AI-driven Learning Management System (LMS) designed for modern online education. It connects students with interactive course tracks, lesson-scoped Google Gemini RAG AI tutors, automated quiz evaluation, and interactive Recharts performance analytics.
 
 ---
 
-## 🌐 Live Production Links
+## 🌟 Core Features & Highlights
 
-*   🏠 **Home Page:** [https://course-forge-gamma.vercel.app](https://course-forge-gamma.vercel.app)
-*   📚 **Course Catalog & Live Search:** [https://course-forge-gamma.vercel.app/courses](https://course-forge-gamma.vercel.app/courses)
-*   🎭 **Interactive Role Onboarding:** [https://course-forge-gamma.vercel.app/select-role](https://course-forge-gamma.vercel.app/select-role)
-*   👨‍🏫 **Instructor Management Dashboard:** [https://course-forge-gamma.vercel.app/dashboard/instructor](https://course-forge-gamma.vercel.app/dashboard/instructor)
+- **1-Click AI Course Authoring:** Instructors enter any technology prompt (*e.g., "Full-Stack Next.js 15 & PostgreSQL Architecture"*) to generate a course title, description, and 4 textbook modules persisted to Supabase PostgreSQL.
+- **Lesson-Scoped Google Gemini RAG Tutor:** Students receive real-time AI assistance constrained strictly to the current lesson's reading material context.
+- **Sub-Second AI Practice Quiz Engine:** Generates typed multiple-choice quizzes with automated visual grading and attempt tracking.
+- **Interactive Recharts Analytics Visual Suite:** Displays score distribution histograms (`QuizScoreBarChart`) and enrollment metrics (`EnrollmentLineChart`).
+- **Live Code Execution Sandbox:** Runs client-side JavaScript code with overridden console outputs.
+- **Full Web Accessibility & Mobile Responsiveness:** WCAG 2.1 Level AA compliant with dark-mode color tokens, ARIA labels, and collapsible mobile drawer navigation.
 
 ---
 
-## 🌟 12 Core Platform Highlights
+## 🏗️ Architecture & Technical Stack
 
-| Feature | Category | Description |
+| Layer | Technology | Key Capabilities |
 | :--- | :--- | :--- |
-| ⚡ **Next.js 16 App Router** | Engine | Powered by Turbopack compilation & React Server Components (RSC) |
-| 🤖 **Lesson AI Tutors** | AI Ecosystem | Interactive lesson-scoped AI assistant for summaries & practice quizzes |
-| 🎭 **Role-Based Workspaces** | User Experience | Dedicated Student Learning Portals & Instructor Command Centers |
-| 🛡️ **Edge RBAC Security** | Security | Next.js Edge middleware enforcing JWT session claim authorization |
-| ⚡ **Server Actions Mutations** | Data Layer | Zero-API RPC functions for course creation and student enrollments |
-| 🗄️ **Supabase PostgreSQL** | Cloud Database | Managed relational database hosted in Tokyo (AP-Northeast) region |
-| 🔌 **Prisma 7 ORM** | Data Layer | Type-safe database queries with `@prisma/adapter-pg` driver adapters |
-| 🔐 **Clerk Authentication** | Auth & Identity | OAuth, dynamic `/sign-in` & `/sign-up` routes, and custom session tokens |
-| 🔄 **Svix Webhook Sync** | Real-Time Sync | HMAC-SHA256 signature verification handler for Clerk -> Supabase user sync |
-| 🔍 **Live Search & Filter** | Interactive UI | Real-time catalog keyword search & category filter pills |
-| 🎨 **Popping Micro-Scale UI** | Animations | Popping micro-scale lifts (`hover:scale-[1.03]`) & emerald-teal color grading |
-| ☁️ **Vercel Cloud CI/CD** | Deployment | Automated GitHub Webhook cloud deployment pipeline on Edge CDN |
+| **Framework** | **Next.js 16.2 (Turbopack)** | App Router, Server Actions, Suspense Streaming Skeletons (`loading.tsx`), Error Boundaries (`error.tsx`) |
+| **Database ORM** | **Prisma 7.9 & Supabase PostgreSQL** | Type-safe ORM, relational schema modeling, direct pooled connections |
+| **AI Intelligence** | **Google Gemini 2.5 Flash (`@google/genai`)** | RAG prompt injection, structured JSON schema generation |
+| **Authentication** | **Clerk Auth & Next.js Proxy** | Role-based metadata (`STUDENT` / `INSTRUCTOR`), Clerk Webhooks sync |
+| **Visualization** | **Recharts Vector Suite** | SVG `BarChart` & `AreaChart` styled with custom dark-mode tooltips |
+| **Styling** | **Tailwind CSS v4 & Lucide Icons** | Glassmorphism, emerald-teal dark mode, custom focus-visible rings |
 
 ---
 
-## 🏛️ System Architecture Diagram
+## 🚀 Local Development Setup
 
-```mermaid
-graph TD
-    subgraph Client ["Browser & Client Layer"]
-        UI["React Server & Client Components"]
-        Search["Live Search & Category Filters"]
-        Form["Progressive Server Action Forms"]
-    end
+### 1. Prerequisites
+- Node.js `≥ 18.0.0`
+- PostgreSQL Database (Supabase recommended)
+- Google Gemini API Key
 
-    subgraph Security ["Edge Security & Authentication"]
-        Middleware["Next.js Edge Middleware (src/middleware.ts)"]
-        ClerkAuth["Clerk Identity Provider (@clerk/nextjs)"]
-        JWTClaims["JWT Session Token Claims (role: INSTRUCTOR/STUDENT)"]
-    end
+### 2. Environment Variables Setup
+Create a `.env` file in `courseforge/` with the following variables:
 
-    subgraph ServerLayer ["Server Execution & Logic Layer"]
-        RSC["React Server Components Rendering"]
-        ServerActions["Server Actions (course-actions.ts / user-actions.ts)"]
-        WebhookHandler["Svix Webhook Handler (/api/webhooks/clerk)"]
-    end
+```env
+# Clerk Authentication Keys
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
+CLERK_SECRET_KEY=sk_test_...
 
-    subgraph DatabaseLayer ["Cloud Database & ORM Layer"]
-        PrismaAdapter["Prisma 7 ORM (@prisma/adapter-pg)"]
-        PgPool["PostgreSQL Connection Pool (pg.Pool)"]
-        SupabaseDB[("Supabase Cloud PostgreSQL - Tokyo AP-Northeast")]
-    end
+# Database Connection Strings (Supabase PostgreSQL)
+DATABASE_URL="postgresql://postgres:[PASSWORD]@db.xxxx.supabase.co:6543/postgres?pgbouncer=true"
+DIRECT_URL="postgresql://postgres:[PASSWORD]@db.xxxx.supabase.co:5432/postgres"
 
-    UI --> Middleware
-    Middleware --> ClerkAuth
-    ClerkAuth --> JWTClaims
-    JWTClaims --> RSC
-    Form --> ServerActions
-    ServerActions --> PrismaAdapter
-    WebhookHandler --> PrismaAdapter
-    PrismaAdapter --> PgPool
-    PgPool --> SupabaseDB
+# Google Gemini AI Key
+GEMINI_API_KEY="AIzaSy..."
+
+# Clerk Webhook Sync Secret
+CLERK_WEBHOOK_SECRET="whsec_..."
 ```
 
----
+### 3. Installation & Database Push
 
-## 🚀 Key Architectural Features Completed (Weeks 1 & 2)
-
-### 🎨 1. UI/UX Design System & Micro-Animations
-*   **Popping Micro-Scale Transforms:** Interactive button lift and scaling animations (`hover:-translate-y-0.5 hover:scale-[1.03] active:scale-[0.97]`).
-*   **Emerald-Teal Gradient Color-Grading:** Hover states dynamically transition into emerald-to-teal gradients with neon ambient box-shadow glows (`hover:shadow-lg hover:shadow-emerald-500/25`).
-*   **Live Catalog Search & Filter Pills:** Real-time keyword filtering and category filter buttons (`All`, `React`, `Next.js`, `TypeScript`).
-*   **Ambient Glow Mesh Hero & Bento Grid:** Feature showcase grid highlighting AI tutors, Server Actions, RBAC workspaces, and cloud databases.
-*   **Sleek 4-Column Dark-Mode Footer:** Footer containing platform navigation links, tech stack badges, and GitHub repository links.
-
-### 🎭 2. Interactive Role Selection & Onboarding
-*   **Universal Role Selection Screen (`/select-role`):** Interactive onboarding choice cards for **Student Mode** and **Instructor Mode**.
-*   **1-Click Mode Switcher Badge:** Header navigation bar displays an active mode indicator (`Instructor Mode` / `Student Mode`) with a 1-click `Switch` trigger.
-*   **Guest & Authenticated Handling:** Supports both guest visitors (directing instructors to `/sign-in` and students to `/courses`) and authenticated users (updating Clerk metadata and Supabase `User.role` in 1 click).
-
-### 🛡️ 3. Edge Authentication & Role-Based Access Control (RBAC)
-*   **Clerk Integration (`@clerk/nextjs`):** Dynamic catch-all sign-in (`/sign-in`) and sign-up (`/sign-up`) routes.
-*   **Edge Middleware Protection (`src/middleware.ts`):** Edge route matchers inspect JWT session claims (`sessionClaims.metadata.role`) to strictly protect `/dashboard/instructor(.*)` routes.
-
-### ⚡ 4. Next.js 16 Server Actions & Data Mutations
-*   **Course Creation Action (`createCourseAction`):** `"use server"` function validating inputs, checking instructor session authorization, and creating course rows in Supabase.
-*   **Student Enrollment Action (`enrollInCourseAction`):** Parameter-bound (`.bind()`) server action inserting relational rows into the `Enrollment` table.
-*   **Edge Cache Invalidation:** Calls `revalidatePath('/courses', 'layout')` to purge Vercel CDN caches, instantly updating UI enrollment state to `✓ You are Enrolled in this Course`.
-
-### 🗄️ 5. Cloud Database & Automated User Sync
-*   **Supabase PostgreSQL:** Managed cloud database hosted in Tokyo AP-Northeast region.
-*   **Prisma 7 ORM Integration:** Configured with `@prisma/adapter-pg` driver adapters and `pg.Pool` connection pooling.
-*   **Real-Time Clerk Webhooks (`/api/webhooks/clerk`):** Cryptographic Svix HMAC-SHA256 signature verification handler synchronizing `user.created`, `user.updated`, and `user.deleted` events into Supabase via `prisma.user.upsert`.
-
----
-
-## 🗃️ Database Schema Architecture (`schema.prisma`)
-
-```prisma
-model User {
-  id          String       @id @default(cuid())
-  clerkId     String       @unique
-  email       String       @unique
-  role        UserRole     @default(STUDENT)
-  courses     Course[]     @relation("InstructorCourses")
-  enrollments Enrollment[]
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-}
-
-model Course {
-  id           String       @id @default(cuid())
-  title        String
-  description  String
-  published    Boolean      @default(false)
-  instructorId String
-  instructor   User         @relation("InstructorCourses", fields: [instructorId], references: [id], onDelete: Cascade)
-  lessons      Lesson[]
-  enrollments  Enrollment[]
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
-}
-
-model Lesson {
-  id        String   @id @default(cuid())
-  title     String
-  content   String
-  order     Int
-  courseId  String
-  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Enrollment {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  courseId  String
-  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-
-  @@unique([userId, courseId])
-}
-
-enum UserRole {
-  STUDENT
-  INSTRUCTOR
-}
-```
-
----
-
-## 🛠️ Local Development Setup
-
-### 1. Clone & Install Dependencies
 ```bash
+# Clone the repository
 git clone https://github.com/MuhammadAbdullah12-ux/CourseForge.git
 cd CourseForge/courseforge
+
+# Install dependencies
 npm install
-```
 
-### 2. Configure Environment Variables
-Create `.env` inside `courseforge/`:
-```env
-DATABASE_URL=postgresql://postgres.eeeeftbbcbblxsqlcsrq:pzYpF3NvhvmmQmbW@aws-0-ap-northeast-1.pooler.supabase.com:5432/postgres
-DIRECT_URL=postgresql://postgres.eeeeftbbcbblxsqlcsrq:pzYpF3NvhvmmQmbW@aws-0-ap-northeast-1.pooler.supabase.com:5432/postgres
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_ZXZvbHZpbmctc2hhcmstOC5jbGVyay5hY2NvdW50cy5kZXYk
-CLERK_SECRET_KEY=sk_test_i3Vp89F1KVDzem3AjF7K2ceu0yaxygxqSmTRp8cpGQ
-NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
-NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
-WEBHOOK_SECRET=whsec_placeholder
-```
-
-### 3. Push Prisma Database Schema & Seed Data
-```bash
+# Push Prisma relational schema to database
 npx prisma db push
-node prisma/seed.js
-```
 
-### 4. Run Development Server
-```bash
+# Launch development server
 npm run dev
 ```
-Open **`http://localhost:3000`** in your browser!
+
+Open **[http://localhost:3000](http://localhost:3000)** in your browser!
 
 ---
 
-© 2026 CourseForge Platform. Built with Next.js 16, Supabase PostgreSQL & Prisma 7.
+## 📜 Production Deployment
+
+Deployed live on Vercel Edge Cloud at:  
+👉 **[https://course-forge-gamma.vercel.app](https://course-forge-gamma.vercel.app)**
