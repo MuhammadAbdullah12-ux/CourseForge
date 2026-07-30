@@ -2,7 +2,10 @@ import React from "react";
 import Link from "next/link";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
+import { getInstructorAnalyticsAction } from "@/app/actions/analytics-actions";
 import { AICourseCreatorModal } from "@/components/ai-course-creator-modal";
+import { QuizScoreBarChart } from "@/components/analytics/quiz-score-barchart";
+import { EnrollmentLineChart } from "@/components/analytics/enrollment-linechart";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,7 +14,7 @@ import { BookOpen, Users, BarChart3, Clock, Eye, Sparkles } from "lucide-react";
 export default async function InstructorDashboardPage() {
   const { userId } = await auth();
 
-  // Fetch courses created by this instructor from Supabase database
+  // 1. Fetch courses created by this instructor from Supabase database
   const courses = await prisma.course.findMany({
     where: {
       instructor: {
@@ -26,6 +29,9 @@ export default async function InstructorDashboardPage() {
       createdAt: "desc",
     },
   });
+
+  // 2. Fetch pre-aggregated analytics metrics from Supabase PostgreSQL
+  const analyticsData = await getInstructorAnalyticsAction();
 
   // Calculate high-level analytics
   const totalCourses = courses.length;
@@ -63,7 +69,7 @@ export default async function InstructorDashboardPage() {
       </div>
 
       {/* Analytics Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
         <Card className="border-slate-800 bg-slate-900/60 backdrop-blur-md">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-slate-400">Total Created Courses</CardTitle>
@@ -96,6 +102,24 @@ export default async function InstructorDashboardPage() {
             <p className="text-xs text-slate-400 mt-1">Total active lessons</p>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Analytics Visualization Suite Section */}
+      <div className="space-y-4 mb-12">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-bold text-slate-100 flex items-center gap-2">
+            <BarChart3 className="size-5 text-emerald-400" />
+            <span>Interactive Analytics Charts</span>
+          </h2>
+          <Badge className="bg-emerald-500/15 text-emerald-400 border border-emerald-500/20 text-xs">
+            Recharts Visual Engine
+          </Badge>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <QuizScoreBarChart data={analyticsData.scoreDistribution} />
+          <EnrollmentLineChart data={analyticsData.courseEngagement} />
+        </div>
       </div>
 
       {/* 1-Click AI Course Creator Component */}
