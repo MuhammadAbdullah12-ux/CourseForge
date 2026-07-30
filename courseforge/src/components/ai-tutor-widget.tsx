@@ -47,7 +47,6 @@ export function AITutorWidget({ lessonTitle, lessonContent }: AITutorWidgetProps
     setTimeout(() => setCopiedIndex(null), 2000);
   };
 
-  // Helper to render Markdown text with code block formatting & copy buttons
   const renderFormattedMarkdown = (text: string) => {
     const parts = text.split(/(```[\s\S]*?```)/g);
 
@@ -64,7 +63,8 @@ export function AITutorWidget({ lessonTitle, lessonContent }: AITutorWidgetProps
               <button
                 type="button"
                 onClick={() => handleCopyCode(codeContent, index)}
-                className="flex items-center gap-1 hover:text-white transition-colors text-[10px] bg-slate-800 px-2 py-0.5 rounded border border-slate-700"
+                aria-label="Copy AI generated code block to clipboard"
+                className="flex items-center gap-1 hover:text-white transition-colors text-[10px] bg-slate-800 px-2 py-0.5 rounded border border-slate-700 focus-visible:ring-2 focus-visible:ring-emerald-500"
               >
                 {copiedIndex === index ? (
                   <>
@@ -129,25 +129,28 @@ export function AITutorWidget({ lessonTitle, lessonContent }: AITutorWidgetProps
             <HelpCircle className="size-3 text-emerald-400" />
             Suggested Questions:
           </span>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2" role="group" aria-label="Suggested AI Tutor Question Prompts">
             <button
               type="button"
               onClick={() => handleQuickQuestion("Explain this lesson's concepts in 3 simple points")}
-              className="text-xs px-2.5 py-1 rounded-lg bg-slate-800/80 text-slate-300 hover:text-white hover:bg-slate-700 border border-slate-700/60 transition-all"
+              aria-label="Ask AI to explain lesson in 3 simple points"
+              className="text-xs px-2.5 py-1 rounded-lg bg-slate-800/80 text-slate-300 hover:text-white hover:bg-slate-700 border border-slate-700/60 transition-all focus-visible:ring-2 focus-visible:ring-emerald-500"
             >
               💡 Explain lesson in 3 points
             </button>
             <button
               type="button"
               onClick={() => handleQuickQuestion("Summarize the main code snippet in this lesson")}
-              className="text-xs px-2.5 py-1 rounded-lg bg-slate-800/80 text-slate-300 hover:text-white hover:bg-slate-700 border border-slate-700/60 transition-all"
+              aria-label="Ask AI to summarize main code snippet"
+              className="text-xs px-2.5 py-1 rounded-lg bg-slate-800/80 text-slate-300 hover:text-white hover:bg-slate-700 border border-slate-700/60 transition-all focus-visible:ring-2 focus-visible:ring-emerald-500"
             >
               💻 Summarize lesson code
             </button>
             <button
               type="button"
               onClick={() => handleQuickQuestion("Generate a 2-question quiz based on this reading material")}
-              className="text-xs px-2.5 py-1 rounded-lg bg-slate-800/80 text-slate-300 hover:text-white hover:bg-slate-700 border border-slate-700/60 transition-all"
+              aria-label="Ask AI to create lesson quiz"
+              className="text-xs px-2.5 py-1 rounded-lg bg-slate-800/80 text-slate-300 hover:text-white hover:bg-slate-700 border border-slate-700/60 transition-all focus-visible:ring-2 focus-visible:ring-emerald-500"
             >
               📝 Create lesson quiz
             </button>
@@ -157,12 +160,17 @@ export function AITutorWidget({ lessonTitle, lessonContent }: AITutorWidgetProps
         {/* Question Form */}
         <form onSubmit={handleSubmit} className="space-y-3 pt-1">
           <div className="relative">
+            <label htmlFor="ai-tutor-prompt-input" className="sr-only">
+              Ask AI Tutor a question about this lesson
+            </label>
             <textarea
+              id="ai-tutor-prompt-input"
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
+              aria-label="Ask AI Tutor a question about this lesson"
               placeholder="Ask AI Tutor a question about this lesson's reading material..."
               rows={3}
-              className="w-full p-3.5 bg-slate-950/80 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all resize-none"
+              className="w-full p-3.5 bg-slate-950/80 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all resize-none"
             />
           </div>
 

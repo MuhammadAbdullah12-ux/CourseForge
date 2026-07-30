@@ -1,37 +1,32 @@
 import * as React from "react"
+import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
-import { Slot } from "radix-ui"
 
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "group/button inline-flex shrink-0 items-center justify-center rounded-xl border border-transparent text-sm font-semibold whitespace-nowrap transition-all duration-200 ease-out outline-none select-none focus-visible:ring-2 focus-visible:ring-emerald-500/50 hover:-translate-y-0.5 hover:scale-[1.03] active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 shadow-sm",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-semibold transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 active:scale-95",
   {
     variants: {
       variant: {
         default:
-          "bg-slate-800/90 text-slate-100 border border-slate-700/80 hover:bg-gradient-to-r hover:from-emerald-500 hover:to-teal-400 hover:text-slate-950 hover:border-emerald-300 hover:shadow-lg hover:shadow-emerald-500/25 font-bold transition-all duration-200",
-        outline:
-          "border border-slate-700/80 bg-slate-900/80 text-slate-100 hover:bg-gradient-to-r hover:from-emerald-500 hover:to-teal-400 hover:text-slate-950 hover:border-emerald-300 hover:shadow-lg hover:shadow-emerald-500/25 font-bold transition-all duration-200",
-        secondary:
-          "bg-slate-800/80 text-slate-200 hover:bg-slate-700 hover:text-white border border-slate-700/50 hover:shadow-md hover:shadow-emerald-500/10",
-        ghost:
-          "text-slate-300 hover:bg-emerald-500/15 hover:text-emerald-300 hover:border-emerald-500/30 border border-transparent",
+          "bg-slate-900 text-slate-100 border border-slate-800 hover:bg-slate-850 hover:border-slate-700 hover:text-white shadow-md hover:-translate-y-0.5 hover:shadow-slate-900/50",
         destructive:
-          "bg-red-500/15 text-red-400 border border-red-500/30 hover:bg-red-500/25 hover:shadow-lg hover:shadow-red-500/20",
-        link: "text-emerald-400 underline-offset-4 hover:underline hover:scale-105",
+          "bg-red-500/20 text-red-300 border border-red-500/30 hover:bg-red-500/30 hover:border-red-500/50 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-red-500/20",
+        outline:
+          "border border-slate-800 bg-slate-900/80 text-slate-100 hover:bg-gradient-to-r hover:from-emerald-400 hover:to-teal-300 hover:text-slate-950 hover:border-emerald-300 hover:font-bold hover:scale-[1.03] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/25",
+        secondary:
+          "bg-slate-800/80 text-slate-200 border border-slate-700/60 hover:bg-slate-700/80 hover:text-white hover:border-slate-600 hover:-translate-y-0.5",
+        ghost: "text-slate-300 hover:bg-slate-800/60 hover:text-emerald-400",
+        link: "text-emerald-400 underline-offset-4 hover:underline hover:text-emerald-300",
         brand:
-          "bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 font-extrabold hover:from-emerald-400 hover:to-teal-300 shadow-lg shadow-emerald-500/25 hover:shadow-xl hover:shadow-emerald-500/40 hover:scale-[1.04] active:scale-95 transition-all duration-200",
+          "bg-gradient-to-r from-emerald-500 via-emerald-400 to-teal-400 text-slate-950 font-extrabold hover:from-emerald-400 hover:to-teal-300 hover:scale-[1.03] hover:-translate-y-0.5 hover:shadow-xl hover:shadow-emerald-500/30",
       },
       size: {
-        default: "h-10 gap-2 px-4",
-        xs: "h-6 gap-1 rounded-md px-2 text-xs [&_svg:not([class*='size-'])]:size-3",
-        sm: "h-8 gap-1.5 rounded-lg px-3 text-xs",
-        lg: "h-12 gap-2.5 px-6 text-base rounded-xl",
-        icon: "size-10 rounded-xl",
-        "icon-xs": "size-6 rounded-md [&_svg:not([class*='size-'])]:size-3",
-        "icon-sm": "size-8 rounded-lg",
-        "icon-lg": "size-12 rounded-xl",
+        default: "h-10 px-4 py-2",
+        sm: "h-9 rounded-lg px-3 text-xs",
+        lg: "h-12 rounded-xl px-8 text-base",
+        icon: "h-10 w-10",
       },
     },
     defaultVariants: {
@@ -41,27 +36,25 @@ const buttonVariants = cva(
   }
 )
 
-function Button({
-  className,
-  variant = "default",
-  size = "default",
-  asChild = false,
-  ...props
-}: React.ComponentProps<"button"> &
-  VariantProps<typeof buttonVariants> & {
-    asChild?: boolean
-  }) {
-  const Comp = asChild ? Slot.Root : "button"
+export interface ButtonProps
+  ? React.ButtonHTMLAttributes<HTMLButtonElement>
+  : React.ButtonHTMLAttributes<HTMLButtonElement> &
+      VariantProps<typeof buttonVariants> & {
+        asChild?: boolean
+      }
 
-  return (
-    <Comp
-      data-slot="button"
-      data-variant={variant}
-      data-size={size}
-      className={cn(buttonVariants({ variant, size, className }))}
-      {...props}
-    />
-  )
-}
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant, size, asChild = false, ...props }, ref) => {
+    const Comp = asChild ? Slot : "button"
+    return (
+      <Comp
+        className={cn(buttonVariants({ variant, size, className }))}
+        ref={ref}
+        {...props}
+      />
+    )
+  }
+)
+Button.displayName = "Button"
 
 export { Button, buttonVariants }
