@@ -10,7 +10,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, Loader2, BookOpen, CheckCircle2, Rocket, ArrowRight, Wand2 } from "lucide-react";
+import { Sparkles, Loader2, BookOpen, CheckCircle2, Rocket, Wand2 } from "lucide-react";
 
 export function AICourseCreatorModal() {
   const [topicPrompt, setTopicPrompt] = useState("");
@@ -24,7 +24,7 @@ export function AICourseCreatorModal() {
   const router = useRouter();
 
   const handleGenerateBlueprint = () => {
-    if (!topicPrompt.trim() || isGenerating) return;
+    if (!topicPrompt.trim() || isGenerating || isPublishing) return;
 
     startGenerateTransition(async () => {
       setErrorMsg(null);
@@ -41,7 +41,7 @@ export function AICourseCreatorModal() {
   };
 
   const handlePublishCourse = () => {
-    if (!blueprint || isPublishing) return;
+    if (!blueprint || isPublishing || isGenerating) return;
 
     startPublishTransition(async () => {
       setErrorMsg(null);
@@ -98,12 +98,13 @@ export function AICourseCreatorModal() {
               type="text"
               value={topicPrompt}
               onChange={(e) => setTopicPrompt(e.target.value)}
+              disabled={isGenerating || isPublishing}
               placeholder="e.g. Full-Stack Next.js 15, PostgreSQL & TypeScript Architecture"
-              className="flex-1 p-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
+              className="flex-1 p-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             />
             <Button
               onClick={handleGenerateBlueprint}
-              disabled={isGenerating || !topicPrompt.trim()}
+              disabled={isGenerating || isPublishing || !topicPrompt.trim()}
               variant="brand"
               className="px-6 flex items-center justify-center gap-2 shrink-0"
             >
@@ -191,7 +192,7 @@ export function AICourseCreatorModal() {
 
               <Button
                 onClick={handlePublishCourse}
-                disabled={isPublishing}
+                disabled={isPublishing || isGenerating}
                 variant="brand"
                 size="sm"
                 className="px-6 flex items-center gap-2"
