@@ -3,8 +3,9 @@ import { Geist, Geist_Mono, Inter } from "next/font/google";
 import Link from "next/link";
 import "./globals.css";
 import { cn } from "@/lib/utils";
-import { ClerkProvider, UserButton } from "@clerk/nextjs";
+import { ClerkProvider } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
+import { Navbar } from "@/components/navbar";
 import { Code2, Database, Shield, Zap } from "lucide-react";
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
@@ -51,90 +52,9 @@ export default async function RootLayout({
         className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, "font-sans", inter.variable)}
       >
         <body className="min-h-full bg-slate-950 text-slate-100 flex flex-col selection:bg-emerald-500/30 selection:text-emerald-300">
-          {/* Shared Header Navigation Bar */}
-          <header className="border-b border-slate-800/80 bg-slate-950/75 backdrop-blur-xl sticky top-0 z-50 transition-all">
-            <nav className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-              
-              {/* Logo / Brand Name */}
-              <Link href="/" className="font-extrabold text-xl text-emerald-400 tracking-tight hover:scale-105 hover:opacity-95 transition-all flex items-center gap-2">
-                <span className="bg-emerald-500/20 text-emerald-400 p-1.5 rounded-xl text-xs border border-emerald-500/30 shadow-inner">
-                  CF
-                </span>
-                <span>CourseForge</span>
-              </Link>
-              
-              {/* Navigation Links with Popping Animations & Color Grading */}
-              <div className="flex gap-2 sm:gap-3 items-center">
-                <Link 
-                  href="/" 
-                  className="px-3.5 py-1.5 rounded-xl text-sm font-medium text-slate-300 hover:text-slate-950 hover:bg-gradient-to-r hover:from-emerald-400 hover:to-teal-300 hover:font-bold hover:scale-105 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/25 transition-all duration-200 ease-out"
-                >
-                  Home
-                </Link>
-                <Link 
-                  href="/about" 
-                  className="px-3.5 py-1.5 rounded-xl text-sm font-medium text-slate-300 hover:text-slate-950 hover:bg-gradient-to-r hover:from-emerald-400 hover:to-teal-300 hover:font-bold hover:scale-105 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/25 transition-all duration-200 ease-out"
-                >
-                  About
-                </Link>
-                <Link 
-                  href="/courses" 
-                  className="px-3.5 py-1.5 rounded-xl text-sm font-medium text-slate-300 hover:text-slate-950 hover:bg-gradient-to-r hover:from-emerald-400 hover:to-teal-300 hover:font-bold hover:scale-105 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/25 transition-all duration-200 ease-out"
-                >
-                  Courses
-                </Link>
-
-                {/* Render Dashboard link for signed-in users */}
-                {userId && (
-                  <Link 
-                    href={userRole === "INSTRUCTOR" ? "/dashboard/instructor" : "/dashboard/student"} 
-                    className="px-3.5 py-1.5 rounded-xl text-sm font-bold text-emerald-400 hover:text-slate-950 hover:bg-gradient-to-r hover:from-emerald-400 hover:to-teal-300 hover:scale-105 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/25 transition-all duration-200 ease-out"
-                  >
-                    Dashboard
-                  </Link>
-                )}
-
-                {/* Render Permanent Select Role Button */}
-                <Link 
-                  href="/select-role" 
-                  title="Choose or switch between Student and Instructor access modes"
-                  className="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-gradient-to-r hover:from-emerald-500 hover:to-teal-400 hover:text-slate-950 hover:border-emerald-300 hover:scale-105 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/30 transition-all duration-200 ease-out flex items-center gap-1.5"
-                >
-                  <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  <span>
-                    {userId 
-                      ? (userRole === "INSTRUCTOR" ? "Instructor Mode" : "Student Mode") 
-                      : "Select Role"}
-                  </span>
-                  <span className="text-[10px] text-slate-400 underline decoration-slate-600">
-                    {userId ? "Switch" : "Choose"}
-                  </span>
-                </Link>
-
-                {/* Auth Controls */}
-                {!userId ? (
-                  <div className="flex items-center gap-2 ml-2">
-                    <Link 
-                      href="/sign-in" 
-                      className="px-3.5 py-1.5 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 hover:scale-105 hover:-translate-y-0.5 transition-all duration-200 ease-out"
-                    >
-                      Sign In
-                    </Link>
-                    <Link 
-                      href="/sign-up" 
-                      className="px-4 py-1.5 rounded-xl text-sm font-extrabold bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 hover:from-emerald-400 hover:to-teal-300 hover:scale-105 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/30 transition-all duration-200 ease-out"
-                    >
-                      Sign Up
-                    </Link>
-                  </div>
-                ) : (
-                  <div className="ml-2 flex items-center hover:scale-105 transition-transform">
-                    <UserButton />
-                  </div>
-                )}
-              </div>
-            </nav>
-          </header>
+          
+          {/* Shared Responsive Header Navigation Component */}
+          <Navbar userId={userId} userRole={userRole} />
 
           {/* Main Page Content Slot */}
           <div className="flex-1">
