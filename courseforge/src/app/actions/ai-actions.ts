@@ -1,7 +1,8 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import { generateAITutorResponse } from "@/lib/ai";
+import { generateAITutorResponse, generateStructuredQuiz, QuizQuestion } from "@/lib/ai";
+import { prisma } from "@/lib/prisma";
 
 export async function askAITutorAction(formData: FormData) {
   const prompt = formData.get("prompt") as string;
@@ -40,6 +41,44 @@ export async function askAITutorAction(formData: FormData) {
     return {
       success: false,
       answer: "⚠️ An error occurred while communicating with the AI server.",
+    };
+  }
+}
+
+export async function generateLessonQuizAction(lessonId: string) {
+  const { userId } = await auth();
+  if (!userId) {
+    return {
+      success: false,
+      error: "🔒 Authentication Required: Please sign in to generate lesson quizzes.",
+      quiz: [] as QuizQuestion[],
+    };
+  }
+
+  try {
+    const lesson = await prisma.lesson.findUnique({
+      where: { id: lessonId },
+    });
+
+    if (!lesson) {
+      return {
+        success: false,
+        error: "Lesson not found.",
+        quiz: [] as QuizQuestion[],
+      };
+    }
+
+    const quiz = await generateStructuredQuiz(lesson.title, lesson.content);
+    return {
+      success: true,
+      quiz,
+    };
+  } catch (error) {
+    console.error("Error generating lesson quiz:", error);
+    return {
+      success: false,
+      error: "Failed to generate AI quiz.",
+      quiz: [] as QuizQuestion[],
     };
   }
 }

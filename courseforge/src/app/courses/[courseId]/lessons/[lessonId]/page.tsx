@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { AITutorWidget } from "@/components/ai-tutor-widget";
+import { AIQuizWidget } from "@/components/ai-quiz-widget";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -71,7 +72,7 @@ export default async function LessonWorkspacePage({ params }: PageProps) {
       {/* Main Dual-Pane Classroom Grid: 2/3 Content Reader on Left, 1/3 AI Tutor Sidebar on Right */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        {/* Left Pane (2/3): Lesson Reader */}
+        {/* Left Pane (2/3): Lesson Reader & AI Quiz Widget */}
         <div className="lg:col-span-2 space-y-6">
           
           <div className="space-y-2">
@@ -100,8 +101,11 @@ export default async function LessonWorkspacePage({ params }: PageProps) {
             </CardContent>
           </Card>
 
+          {/* Interactive AI Knowledge Check Quiz Component */}
+          <AIQuizWidget lessonId={lesson.id} lessonTitle={lesson.title} />
+
           {/* Previous & Next Lesson Controls */}
-          <div className="flex items-center justify-between pt-4 border-t border-slate-800/80 gap-4">
+          <div className="flex items-center justify-between pt-6 border-t border-slate-800/80 gap-4 mt-8">
             {prevLesson ? (
               <Link href={`/courses/${courseId}/lessons/${prevLesson.id}`}>
                 <Button variant="outline" size="sm" className="flex items-center gap-1.5 border-slate-800 hover:border-emerald-500/40">

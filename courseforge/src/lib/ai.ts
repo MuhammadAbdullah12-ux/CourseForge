@@ -1,8 +1,12 @@
+export interface QuizQuestion {
+  question: string;
+  options: string[];
+  correctAnswerIndex: number;
+  explanation: string;
+}
+
 /**
  * Reusable AI Tutor Response Generator with RAG Context Injection
- * @param prompt - The student's question or prompt
- * @param lessonTitle - Optional lesson context for scoped tutor assistance
- * @param lessonContent - Optional full reading material text of the lesson
  */
 export async function generateAITutorResponse(
   prompt: string,
@@ -31,55 +35,132 @@ ${contextHeader}${contentBlock}`;
 
   const fullPrompt = `${systemInstruction}\n\nStudent Question: ${prompt}`;
 
-  // 1. Fetch available models for this specific API key directly from Google
   try {
-    const listRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models?key=${currentApiKey}`
-    );
-    const listData = await listRes.json();
-
-    if (listData.error) {
-      return `⚠️ **Google API Key Status:** ${listData.error.message}`;
-    }
-
-    const availableModels: string[] = (listData.models || [])
-      .filter((m: any) => m.supportedGenerationMethods?.includes("generateContent"))
-      .map((m: any) => m.name.replace("models/", ""));
-
-    if (availableModels.length === 0) {
-      return `⚠️ **Google API Notice:** No generateContent models available for this key.`;
-    }
-
-    for (const modelName of availableModels) {
-      try {
-        const postRes = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${currentApiKey}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              contents: [
-                {
-                  parts: [{ text: fullPrompt }],
-                },
-              ],
-            }),
-          }
-        );
-
-        const postData = await postRes.json();
-
-        if (postData.candidates && postData.candidates[0]?.content?.parts[0]?.text) {
-          return postData.candidates[0].content.parts[0].text;
-        }
-      } catch (e) {
-        console.warn(`Model ${modelName} call failed:`, e);
+    const postRes = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${currentApiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: fullPrompt }] }],
+        }),
       }
+    );
+
+    const postData = await postRes.json();
+
+    if (postData.candidates && postData.candidates[0]?.content?.parts[0]?.text) {
+      return postData.candidates[0].content.parts[0].text;
     }
 
-    return `⚠️ **Google Gemini API Notice:** Attempted models (${availableModels.join(", ")}), but no response text was returned.`;
+    return `⚠️ **Google Gemini API Notice:** No response text returned.`;
   } catch (error: any) {
     console.error("Gemini Direct Fetch Error:", error);
     return `⚠️ **Connection Error:** ${error?.message || String(error)}`;
   }
+}
+
+/**
+ * Generates a structured JSON array 3-question quiz based on lesson reading material
+ */
+export async function generateStructuredQuiz(
+  lessonTitle: string,
+  lessonContent: string
+): Promise<QuizQuestion[]> {
+  const currentApiKey = process.env.GEMINI_API_KEY;
+
+  if (!currentApiKey || currentApiKey === "AIzaSy_demo_placeholder_key") {
+    return [
+      {
+        question: `What is the primary focus of "${lessonTitle}"?`,
+        options: [
+          "Understanding core architectural concepts and syntax",
+          "Building random unstyled legacy tables",
+          "Bypassing authentication security checks",
+          "Disabling database indexes"
+        ],
+        correctAnswerIndex: 0,
+        explanation: "Lesson materials focus on component architecture, state management, and modern development standards."
+      },
+      {
+        question: "How should dynamic component states be handled in modern web applications?",
+        options: [
+          "Directly mutating global window state variables",
+          "Using dedicated state hooks and functional setters",
+          "Writing inline script tags inside body tags",
+          "Deleting database tables"
+        ],
+        correctAnswerIndex: 1,
+        explanation: "State hooks and functional setter updates preserve reactivity and prevent state corruption."
+      },
+      {
+        question: "What is the recommended approach for production deployments?",
+        options: [
+          "Running manual un-minified local scripts",
+          "Configuring secure environment variables and edge CDN distribution",
+          "Storing secret API keys in public client HTML",
+          "Ignoring compiler build warnings"
+        ],
+        correctAnswerIndex: 1,
+        explanation: "Edge CDN distribution and environment variable isolation ensure security and global performance."
+      }
+    ];
+  }
+
+  const systemInstruction = "You are CourseForge Quiz Generator. Create an engaging 3-question multiple-choice practice quiz based strictly on the lesson reading material provided below.\n" +
+    `Lesson Title: "${lessonTitle}"\n` +
+    "Lesson Reading Material:\n" +
+    '"""\n' + lessonContent.slice(0, 3000) + '\n"""\n\n' +
+    "CRITICAL INSTRUCTIONS:\n" +
+    "- You MUST return ONLY a raw JSON array containing exactly 3 question objects.\n" +
+    "- Do NOT wrap your output in markdown code backticks or add any commentary outside the JSON array.\n" +
+    "- Each question object MUST have this exact schema:\n" +
+    "[\n" +
+    "  {\n" +
+    '    "question": "Clear question text?",\n' +
+    '    "options": ["Option A", "Option B", "Option C", "Option D"],\n' +
+    '    "correctAnswerIndex": 0,\n' +
+    '    "explanation": "Detailed explanation of why Option A is correct."\n' +
+    "  }\n" +
+    "]";
+
+  try {
+    const postRes = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${currentApiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: systemInstruction }] }],
+        }),
+      }
+    );
+
+    const postData = await postRes.json();
+    const rawText = postData.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    if (rawText) {
+      const cleanedJson = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
+      const parsedQuestions: QuizQuestion[] = JSON.parse(cleanedJson);
+      if (Array.isArray(parsedQuestions) && parsedQuestions.length > 0) {
+        return parsedQuestions;
+      }
+    }
+  } catch (error) {
+    console.error("Error in generateStructuredQuiz:", error);
+  }
+
+  return [
+    {
+      question: `Key Takeaway for "${lessonTitle}"`,
+      options: [
+        "Component architecture and modular design",
+        "Legacy static HTML pages",
+        "Un-sanitized SQL strings",
+        "Direct DOM manipulation"
+      ],
+      correctAnswerIndex: 0,
+      explanation: "Modular design and component architecture provide scalability and code maintainability."
+    }
+  ];
 }
