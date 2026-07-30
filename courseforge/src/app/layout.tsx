@@ -73,17 +73,17 @@ export default async function RootLayout({
                   Courses
                 </Link>
 
-                {/* Render Instructor Dashboard link if user is an Instructor */}
-                {userId && userRole === "INSTRUCTOR" && (
+                {/* Render Dashboard link for signed-in users */}
+                {userId && (
                   <Link 
-                    href="/dashboard/instructor" 
+                    href={userRole === "INSTRUCTOR" ? "/dashboard/instructor" : "/dashboard/student"} 
                     className="px-3.5 py-1.5 rounded-xl text-sm font-bold text-emerald-400 hover:text-slate-950 hover:bg-gradient-to-r hover:from-emerald-400 hover:to-teal-300 hover:scale-105 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/25 transition-all duration-200 ease-out"
                   >
                     Dashboard
                   </Link>
                 )}
 
-                {/* Render Permanent Select Role Button with Color-Graded Hover Glow */}
+                {/* Render Permanent Select Role Button */}
                 <Link 
                   href="/select-role" 
                   title="Choose or switch between Student and Instructor access modes"
@@ -168,8 +168,8 @@ export default async function RootLayout({
               <div className="space-y-2">
                 <h4 className="text-xs font-semibold text-slate-200 uppercase tracking-wider">Platform</h4>
                 <ul className="space-y-1.5 text-xs">
+                  <li><Link href="/dashboard/student" className="hover:text-emerald-400 transition-colors">Student Dashboard</Link></li>
                   <li><Link href="/dashboard/instructor" className="hover:text-emerald-400 transition-colors">Instructor Portal</Link></li>
-                  <li><Link href="/courses" className="hover:text-emerald-400 transition-colors">Student Learning</Link></li>
                   <li>
                     <a 
                       href="https://github.com/MuhammadAbdullah12-ux/CourseForge" 

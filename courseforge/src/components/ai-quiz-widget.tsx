@@ -2,8 +2,9 @@
 
 import React, { useState, useTransition } from "react";
 import { generateLessonQuizAction } from "@/app/actions/ai-actions";
+import { saveQuizAttemptAction } from "@/app/actions/quiz-actions";
 import { QuizQuestion } from "@/lib/ai";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { HelpCircle, Sparkles, CheckCircle2, XCircle, Trophy, RotateCcw, Loader2, ArrowRight, Award } from "lucide-react";
@@ -58,12 +59,21 @@ export function AIQuizWidget({ lessonId, lessonTitle }: AIQuizWidgetProps) {
   };
 
   const handleNextQuestion = () => {
+    const currentQ = questions[currentIndex];
+    const isCorrect = selectedOption === currentQ.correctAnswerIndex;
+    const finalScore = isCorrect ? score + 1 : score;
+
     if (currentIndex < questions.length - 1) {
       setCurrentIndex((prev) => prev + 1);
       setSelectedOption(null);
       setIsAnswerSubmitted(false);
     } else {
       setIsQuizCompleted(true);
+
+      // Automatically save quiz score to Supabase PostgreSQL
+      startTransition(async () => {
+        await saveQuizAttemptAction(lessonId, finalScore, questions.length);
+      });
     }
   };
 
@@ -241,15 +251,15 @@ export function AIQuizWidget({ lessonId, lessonTitle }: AIQuizWidgetProps) {
             
             <div className="space-y-1">
               <Badge className="bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-xs">
-                Quiz Completed
+                Score Saved to Supabase
               </Badge>
               <h3 className="text-2xl font-extrabold text-slate-100">
                 You Scored {score} / {questions.length}!
               </h3>
               <p className="text-xs text-slate-400 max-w-sm mx-auto">
                 {score === questions.length
-                  ? "🎉 Perfect Score! You have mastered the concepts in this lesson."
-                  : "Great effort! Review the reading material to reinforce key concepts."}
+                  ? "🎉 Perfect Score! Your score has been logged to your Student Analytics Dashboard."
+                  : "Great effort! Score logged. Review reading materials to boost your average."}
               </p>
             </div>
 

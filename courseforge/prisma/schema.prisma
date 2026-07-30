@@ -18,8 +18,9 @@ model User {
   createdAt DateTime @default(now())
   
   // Relations
-  courses     Course[]     @relation("InstructorCourses")
-  enrollments Enrollment[]
+  courses      Course[]      @relation("InstructorCourses")
+  enrollments  Enrollment[]
+  quizAttempts QuizAttempt[]
 }
 
 // 2. Course Model (created by Instructors)
@@ -46,6 +47,9 @@ model Lesson {
   content   String   @db.Text // Allows long text for lesson contents
   order     Int
   createdAt DateTime @default(now())
+
+  // Relations
+  quizAttempts QuizAttempt[]
 }
 
 // 4. Enrollment Model (joins Users and Courses)
@@ -59,4 +63,16 @@ model Enrollment {
 
   // Prevents a student from enrolling in the same course twice
   @@unique([userId, courseId])
+}
+
+// 5. QuizAttempt Model (saves student quiz scores)
+model QuizAttempt {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lessonId  String
+  lesson    Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  score     Int
+  total     Int
+  createdAt DateTime @default(now())
 }
