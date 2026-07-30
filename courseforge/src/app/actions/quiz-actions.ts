@@ -19,20 +19,23 @@ export async function saveQuizAttemptAction(
   }
 
   try {
-    // 1. Ensure User record exists in Supabase PostgreSQL
-    const userEmail =
-      (sessionClaims?.email as string) ||
-      `user_${userId.slice(-6)}@courseforge.com`;
-
-    const dbUser = await prisma.user.upsert({
+    // 1. Safely resolve User record in Supabase PostgreSQL
+    let dbUser = await prisma.user.findUnique({
       where: { clerkId: userId },
-      update: {},
-      create: {
-        clerkId: userId,
-        email: userEmail,
-        role: "STUDENT",
-      },
     });
+
+    if (!dbUser) {
+      const rawEmail = typeof sessionClaims?.email === "string" ? sessionClaims.email : null;
+      const fallbackEmail = rawEmail || `student_${userId.slice(-8)}@courseforge.com`;
+
+      dbUser = await prisma.user.create({
+        data: {
+          clerkId: userId,
+          email: fallbackEmail,
+          role: "STUDENT",
+        },
+      });
+    }
 
     // 2. Insert QuizAttempt row into Supabase PostgreSQL
     await prisma.quizAttempt.create({

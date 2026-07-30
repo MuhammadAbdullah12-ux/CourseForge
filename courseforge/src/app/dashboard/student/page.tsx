@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { GraduationCap, BookOpen, Award, CheckCircle2, Trophy, Clock, ArrowRight, PlayCircle, BarChart3 } from "lucide-react";
+import { GraduationCap, BookOpen, Award, Trophy, Clock, PlayCircle, BarChart3 } from "lucide-react";
 
 export default async function StudentDashboardPage() {
   const { userId, sessionClaims } = await auth();
@@ -16,19 +16,9 @@ export default async function StudentDashboardPage() {
     redirect("/sign-in?redirect_url=/dashboard/student");
   }
 
-  // 2. Fetch User from Supabase PostgreSQL with enrollments & quizAttempts
-  const userEmail =
-    (sessionClaims?.email as string) ||
-    `user_${userId.slice(-6)}@courseforge.com`;
-
-  const dbUser = await prisma.user.upsert({
+  // 2. Safely resolve User from Supabase PostgreSQL with enrollments & quizAttempts
+  let dbUser = await prisma.user.findUnique({
     where: { clerkId: userId },
-    update: {},
-    create: {
-      clerkId: userId,
-      email: userEmail,
-      role: "STUDENT",
-    },
     include: {
       enrollments: {
         include: {
@@ -61,6 +51,51 @@ export default async function StudentDashboardPage() {
       },
     },
   });
+
+  // If user does not exist in Supabase yet, create fallback student record
+  if (!dbUser) {
+    const rawEmail = typeof sessionClaims?.email === "string" ? sessionClaims.email : null;
+    const fallbackEmail = rawEmail || `student_${userId.slice(-8)}@courseforge.com`;
+
+    dbUser = await prisma.user.create({
+      data: {
+        clerkId: userId,
+        email: fallbackEmail,
+        role: "STUDENT",
+      },
+      include: {
+        enrollments: {
+          include: {
+            course: {
+              include: {
+                instructor: true,
+                lessons: {
+                  orderBy: {
+                    order: "asc",
+                  },
+                },
+              },
+            },
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+        },
+        quizAttempts: {
+          include: {
+            lesson: {
+              include: {
+                course: true,
+              },
+            },
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+        },
+      },
+    });
+  }
 
   // 3. Compute Analytics Metrics
   const enrolledCount = dbUser.enrollments.length;
