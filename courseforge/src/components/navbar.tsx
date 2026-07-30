@@ -59,7 +59,7 @@ export function Navbar({ userId, userRole }: NavbarProps) {
           <span>CourseForge</span>
         </Link>
         
-        {/* Desktop Navigation Links (TRULY UNIQUE PER ROLE) */}
+        {/* Desktop Navigation Links (DEDICATED URL WEBPAGES PER LINK) */}
         <div className="hidden md:flex gap-2 sm:gap-3 items-center">
           
           <Link 
@@ -69,7 +69,7 @@ export function Navbar({ userId, userRole }: NavbarProps) {
             Home
           </Link>
 
-          {/* 🟩 STUDENT EXCLUSIVE NAVBAR LINKS */}
+          {/* 🟩 STUDENT DEDICATED WEBPAGE LINKS */}
           {isStudent && (
             <>
               <Link 
@@ -102,7 +102,7 @@ export function Navbar({ userId, userRole }: NavbarProps) {
             </>
           )}
 
-          {/* 🟦 INSTRUCTOR EXCLUSIVE NAVBAR LINKS */}
+          {/* 🟦 INSTRUCTOR DEDICATED WEBPAGE LINKS */}
           {isInstructor && (
             <>
               <Link 
@@ -121,14 +121,6 @@ export function Navbar({ userId, userRole }: NavbarProps) {
                 <span>+ Create AI Course</span>
               </Link>
 
-              <Link 
-                href="/dashboard/instructor" 
-                className="px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium text-slate-300 hover:text-cyan-400 hover:bg-slate-900 transition-all flex items-center gap-1.5"
-              >
-                <BarChart3 className="size-3.5 text-cyan-400" />
-                <span>Analytics</span>
-              </Link>
-
               {userId && (
                 <Link
                   href="/dashboard/instructor"
@@ -141,11 +133,11 @@ export function Navbar({ userId, userRole }: NavbarProps) {
             </>
           )}
 
-          {/* 🟪 ADMIN EXCLUSIVE NAVBAR LINKS */}
+          {/* 🟪 ADMIN DEDICATED WEBPAGE LINKS (SEPARATE DEDICATED URLS) */}
           {isAdmin && (
             <>
               <Link 
-                href="/dashboard/admin" 
+                href="/dashboard/admin/users" 
                 className="px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium text-slate-300 hover:text-purple-400 hover:bg-slate-900 transition-all flex items-center gap-1.5"
               >
                 <UserCog className="size-3.5 text-purple-400" />
@@ -153,7 +145,7 @@ export function Navbar({ userId, userRole }: NavbarProps) {
               </Link>
 
               <Link 
-                href="/dashboard/admin" 
+                href="/dashboard/admin/courses" 
                 className="px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium text-slate-300 hover:text-purple-400 hover:bg-slate-900 transition-all flex items-center gap-1.5"
               >
                 <Sliders className="size-3.5 text-purple-400" />
@@ -161,7 +153,7 @@ export function Navbar({ userId, userRole }: NavbarProps) {
               </Link>
 
               <Link 
-                href="/dashboard/admin" 
+                href="/dashboard/admin/telemetry" 
                 className="px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium text-slate-300 hover:text-purple-400 hover:bg-slate-900 transition-all flex items-center gap-1.5"
               >
                 <BarChart3 className="size-3.5 text-purple-400" />
@@ -239,7 +231,7 @@ export function Navbar({ userId, userRole }: NavbarProps) {
 
       </nav>
 
-      {/* Mobile Menu Dropdown Drawer (Role Specific) */}
+      {/* Mobile Menu Dropdown Drawer (Role Specific Dedicated URLs) */}
       {isMobileMenuOpen && (
         <div className="md:hidden border-b border-slate-800 bg-slate-950/95 backdrop-blur-2xl px-6 py-4 space-y-3 shadow-2xl animate-in slide-in-from-top-2">
           <Link
@@ -251,7 +243,62 @@ export function Navbar({ userId, userRole }: NavbarProps) {
             <span>Home</span>
           </Link>
 
-          {/* Student Mobile Links */}
+          {/* Admin Dedicated Mobile Links */}
+          {isAdmin && (
+            <>
+              <Link
+                href="/dashboard/admin/users"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center gap-2.5 p-2.5 rounded-xl text-sm font-medium text-slate-200 hover:bg-slate-900 hover:text-purple-400 transition-colors"
+              >
+                <UserCog className="size-4 text-purple-400" />
+                <span>User Directory</span>
+              </Link>
+
+              <Link
+                href="/dashboard/admin/courses"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center gap-2.5 p-2.5 rounded-xl text-sm font-medium text-slate-200 hover:bg-slate-900 hover:text-purple-400 transition-colors"
+              >
+                <Sliders className="size-4 text-purple-400" />
+                <span>Course Moderation</span>
+              </Link>
+
+              <Link
+                href="/dashboard/admin/telemetry"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center gap-2.5 p-2.5 rounded-xl text-sm font-medium text-slate-200 hover:bg-slate-900 hover:text-purple-400 transition-colors"
+              >
+                <BarChart3 className="size-4 text-purple-400" />
+                <span>Telemetry Stream</span>
+              </Link>
+
+              <Link
+                href="/dashboard/admin"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center gap-2.5 p-2.5 rounded-xl text-sm font-bold text-purple-300 bg-purple-500/15 border border-purple-500/30"
+              >
+                <ShieldCheck className="size-4 text-purple-400" />
+                <span>Admin Portal</span>
+              </Link>
+            </>
+          )}
+
+          {/* Instructor Dedicated Mobile Links */}
+          {isInstructor && (
+            <>
+              <Link
+                href="/dashboard/instructor"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center gap-2.5 p-2.5 rounded-xl text-sm font-bold text-cyan-300 bg-cyan-500/15 border border-cyan-500/30"
+              >
+                <Briefcase className="size-4 text-cyan-400" />
+                <span>Instructor Portal</span>
+              </Link>
+            </>
+          )}
+
+          {/* Student Dedicated Mobile Links */}
           {isStudent && (
             <>
               <Link
@@ -269,50 +316,6 @@ export function Navbar({ userId, userRole }: NavbarProps) {
               >
                 <GraduationCap className="size-4 text-emerald-400" />
                 <span>Student Dashboard</span>
-              </Link>
-            </>
-          )}
-
-          {/* Instructor Mobile Links */}
-          {isInstructor && (
-            <>
-              <Link
-                href="/dashboard/instructor"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="flex items-center gap-2.5 p-2.5 rounded-xl text-sm font-medium text-slate-200 hover:bg-slate-900 hover:text-cyan-400 transition-colors"
-              >
-                <PlusCircle className="size-4 text-cyan-400" />
-                <span>+ Create AI Course</span>
-              </Link>
-              <Link
-                href="/dashboard/instructor"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="flex items-center gap-2.5 p-2.5 rounded-xl text-sm font-bold text-cyan-300 bg-cyan-500/15 border border-cyan-500/30"
-              >
-                <Briefcase className="size-4 text-cyan-400" />
-                <span>Instructor Portal</span>
-              </Link>
-            </>
-          )}
-
-          {/* Admin Mobile Links */}
-          {isAdmin && (
-            <>
-              <Link
-                href="/dashboard/admin"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="flex items-center gap-2.5 p-2.5 rounded-xl text-sm font-medium text-slate-200 hover:bg-slate-900 hover:text-purple-400 transition-colors"
-              >
-                <UserCog className="size-4 text-purple-400" />
-                <span>User Directory</span>
-              </Link>
-              <Link
-                href="/dashboard/admin"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="flex items-center gap-2.5 p-2.5 rounded-xl text-sm font-bold text-purple-300 bg-purple-500/15 border border-purple-500/30"
-              >
-                <ShieldCheck className="size-4 text-purple-400" />
-                <span>Admin Portal</span>
               </Link>
             </>
           )}
