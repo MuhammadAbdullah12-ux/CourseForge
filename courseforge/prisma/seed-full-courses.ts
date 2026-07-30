@@ -2,62 +2,100 @@ import "dotenv/config";
 import { prisma } from "../src/lib/prisma";
 
 async function seedFullCoursesWithFaculty() {
-  console.log("🚀 Seeding 6 Real Instructors & 12 CS Degree Courses into Supabase PostgreSQL...");
+  console.log("🚀 Seeding 6 Real Instructors with Login Variants & 12 CS Courses into Supabase...");
 
-  // 1. Create Faculty of 6 Instructors
+  // 1. Create Faculty of 6 Instructors with Clerk Test Email Variants
   const facultyMembers = [
     {
-      clerkId: "instructor_abdullah",
-      email: "muhammad.abdullah@courseforge.com",
-      role: "INSTRUCTOR",
       name: "Muhammad Abdullah",
+      handle: "muhammad.abdullah",
+      emails: [
+        "muhammad.abdullah@courseforge.com",
+        "abdullah+clerk_test@example.com",
+        "muhammad.abdullah+clerk_test@example.com",
+        "abdullah@example.com",
+      ],
     },
     {
-      clerkId: "instructor_sarah_jenkins",
-      email: "sarah.jenkins@courseforge.com",
-      role: "INSTRUCTOR",
       name: "Dr. Sarah Jenkins",
+      handle: "sarah.jenkins",
+      emails: [
+        "sarah.jenkins@courseforge.com",
+        "sarah+clerk_test@example.com",
+        "sarah.jenkins+clerk_test@example.com",
+        "sarah.jenkins@example.com",
+      ],
     },
     {
-      clerkId: "instructor_alex_chen",
-      email: "alex.chen@courseforge.com",
-      role: "INSTRUCTOR",
       name: "Dr. Alex Chen",
+      handle: "alex.chen",
+      emails: [
+        "alex.chen@courseforge.com",
+        "alex+clerk_test@example.com",
+        "alex.chen+clerk_test@example.com",
+        "alex.chen@example.com",
+      ],
     },
     {
-      clerkId: "instructor_marcus_vance",
-      email: "marcus.vance@courseforge.com",
-      role: "INSTRUCTOR",
       name: "Prof. Marcus Vance",
+      handle: "marcus.vance",
+      emails: [
+        "marcus.vance@courseforge.com",
+        "marcus+clerk_test@example.com",
+        "marcus.vance+clerk_test@example.com",
+        "marcus.vance@example.com",
+      ],
     },
     {
-      clerkId: "instructor_elena_rostova",
-      email: "elena.rostova@courseforge.com",
-      role: "INSTRUCTOR",
       name: "Elena Rostova",
+      handle: "elena.rostova",
+      emails: [
+        "elena.rostova@courseforge.com",
+        "elena+clerk_test@example.com",
+        "elena.rostova+clerk_test@example.com",
+        "elena.rostova@example.com",
+      ],
     },
     {
-      clerkId: "instructor_david_miller",
-      email: "david.miller@courseforge.com",
-      role: "INSTRUCTOR",
       name: "David K. Miller",
+      handle: "david.miller",
+      emails: [
+        "david.miller@courseforge.com",
+        "david+clerk_test@example.com",
+        "david.miller+clerk_test@example.com",
+        "david.miller@example.com",
+      ],
     },
   ];
 
   const instructorMap: Record<string, string> = {};
 
   for (const fac of facultyMembers) {
-    const user = await prisma.user.upsert({
-      where: { email: fac.email },
-      update: { role: "INSTRUCTOR" },
-      create: {
-        clerkId: fac.clerkId,
-        email: fac.email,
-        role: "INSTRUCTOR",
-      },
-    });
-    instructorMap[fac.name] = user.id;
-    console.log(`👨‍🏫 Faculty Member: ${fac.name} (${fac.email})`);
+    console.log(`\n👨‍🏫 Faculty Member: ${fac.name}`);
+    let primaryUserId: string | null = null;
+
+    for (const email of fac.emails) {
+      const fakeClerkId = `user_${email.replace(/[^a-zA-Z0-9]/g, "_")}`;
+
+      const user = await prisma.user.upsert({
+        where: { email },
+        update: { role: "INSTRUCTOR" },
+        create: {
+          clerkId: fakeClerkId,
+          email,
+          role: "INSTRUCTOR",
+        },
+      });
+
+      if (!primaryUserId) {
+        primaryUserId = user.id;
+      }
+      console.log(`   └─ Registered login email: ${email}`);
+    }
+
+    if (primaryUserId) {
+      instructorMap[fac.name] = primaryUserId;
+    }
   }
 
   const coursesData = [
@@ -355,32 +393,9 @@ async function seedFullCoursesWithFaculty() {
     }
 
     console.log(`\n📚 Course: ${course.title} (Instructor: ${cData.instructorName})`);
-
-    // Create 12 lessons for this course
-    for (let i = 0; i < cData.lessons.length; i++) {
-      const lData = cData.lessons[i];
-      const existingLesson = await prisma.lesson.findFirst({
-        where: {
-          courseId: course.id,
-          title: lData.title,
-        },
-      });
-
-      if (!existingLesson) {
-        await prisma.lesson.create({
-          data: {
-            courseId: course.id,
-            title: lData.title,
-            content: lData.content,
-            order: i + 1,
-          },
-        });
-        console.log(`   └─ Module ${i + 1}: ${lData.title}`);
-      }
-    }
   }
 
-  console.log("\n🎉 6 Real Faculty Members & 12 CS Degree Courses successfully seeded into Supabase!");
+  console.log("\n🎉 All 6 Faculty Members & Login Email Variants successfully seeded into Supabase!");
 }
 
 seedFullCoursesWithFaculty()
