@@ -87,7 +87,7 @@ export function AdminControlCenter({
         setUsersList((prev) =>
           prev.map((u) => (u.id === userId ? { ...u, role: newRole } : u))
         );
-        setFeedbackMsg({ type: "success", text: res.message || "Role updated successfully." });
+        setFeedbackMsg({ type: "success", text: (res as any).message || "Role updated successfully." });
       } else {
         setFeedbackMsg({ type: "error", text: res.error || "Failed to update role." });
       }
@@ -103,7 +103,7 @@ export function AdminControlCenter({
       const res = await deleteUserAdminAction(userId);
       if (res.success) {
         setUsersList((prev) => prev.filter((u) => u.id !== userId));
-        setFeedbackMsg({ type: "success", text: res.message || "User deleted." });
+        setFeedbackMsg({ type: "success", text: (res as any).message || "User deleted." });
       } else {
         setFeedbackMsg({ type: "error", text: res.error || "Failed to delete user." });
       }
@@ -111,15 +111,15 @@ export function AdminControlCenter({
   };
 
   // 3. Handle Course Published Toggle
-  const handleToggleCoursePublished = (courseId: string) => {
+  const handleToggleCoursePublished = (courseId: string, currentPublishedState: boolean) => {
     startTransition(async () => {
       setFeedbackMsg(null);
-      const res = await toggleCoursePublishedAdminAction(courseId);
+      const res = await toggleCoursePublishedAdminAction(courseId, !currentPublishedState);
       if (res.success) {
         setCoursesList((prev) =>
           prev.map((c) => (c.id === courseId ? { ...c, published: !c.published } : c))
         );
-        setFeedbackMsg({ type: "success", text: res.message || "Course status updated." });
+        setFeedbackMsg({ type: "success", text: (res as any).message || "Course status updated." });
       } else {
         setFeedbackMsg({ type: "error", text: res.error || "Failed to toggle status." });
       }
@@ -135,7 +135,7 @@ export function AdminControlCenter({
       const res = await deleteCourseAdminAction(courseId);
       if (res.success) {
         setCoursesList((prev) => prev.filter((c) => c.id !== courseId));
-        setFeedbackMsg({ type: "success", text: res.message || "Course deleted." });
+        setFeedbackMsg({ type: "success", text: (res as any).message || "Course deleted." });
       } else {
         setFeedbackMsg({ type: "error", text: res.error || "Failed to delete course." });
       }
@@ -451,7 +451,7 @@ export function AdminControlCenter({
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleToggleCoursePublished(c.id)}
+                            onClick={() => handleToggleCoursePublished(c.id, c.published)}
                             disabled={isPending}
                             className="text-[11px] h-7 px-2 border-slate-800"
                           >

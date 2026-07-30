@@ -1,33 +1,69 @@
 import "dotenv/config";
 import { prisma } from "../src/lib/prisma";
 
-async function seedFullCourses() {
-  console.log("🚀 Seeding 12 Computer Science degree courses (144 Modules) into Supabase PostgreSQL...");
+async function seedFullCoursesWithFaculty() {
+  console.log("🚀 Seeding 6 Real Instructors & 12 CS Degree Courses into Supabase PostgreSQL...");
 
-  // 1. Ensure primary instructor account exists
-  let instructor = await prisma.user.findFirst({
-    where: {
-      OR: [
-        { role: "INSTRUCTOR" },
-        { email: "muhammad.abdullah@courseforge.com" },
-        { email: { contains: "abdullah" } },
-      ],
+  // 1. Create Faculty of 6 Instructors
+  const facultyMembers = [
+    {
+      clerkId: "instructor_abdullah",
+      email: "muhammad.abdullah@courseforge.com",
+      role: "INSTRUCTOR",
+      name: "Muhammad Abdullah",
     },
-  });
+    {
+      clerkId: "instructor_sarah_jenkins",
+      email: "sarah.jenkins@courseforge.com",
+      role: "INSTRUCTOR",
+      name: "Dr. Sarah Jenkins",
+    },
+    {
+      clerkId: "instructor_alex_chen",
+      email: "alex.chen@courseforge.com",
+      role: "INSTRUCTOR",
+      name: "Dr. Alex Chen",
+    },
+    {
+      clerkId: "instructor_marcus_vance",
+      email: "marcus.vance@courseforge.com",
+      role: "INSTRUCTOR",
+      name: "Prof. Marcus Vance",
+    },
+    {
+      clerkId: "instructor_elena_rostova",
+      email: "elena.rostova@courseforge.com",
+      role: "INSTRUCTOR",
+      name: "Elena Rostova",
+    },
+    {
+      clerkId: "instructor_david_miller",
+      email: "david.miller@courseforge.com",
+      role: "INSTRUCTOR",
+      name: "David K. Miller",
+    },
+  ];
 
-  if (!instructor) {
-    instructor = await prisma.user.create({
-      data: {
-        clerkId: "instructor_primary_seed",
-        email: "muhammad.abdullah@courseforge.com",
+  const instructorMap: Record<string, string> = {};
+
+  for (const fac of facultyMembers) {
+    const user = await prisma.user.upsert({
+      where: { email: fac.email },
+      update: { role: "INSTRUCTOR" },
+      create: {
+        clerkId: fac.clerkId,
+        email: fac.email,
         role: "INSTRUCTOR",
       },
     });
+    instructorMap[fac.name] = user.id;
+    console.log(`👨‍🏫 Faculty Member: ${fac.name} (${fac.email})`);
   }
 
   const coursesData = [
     // Course 1: Data Structures & Algorithms
     {
+      instructorName: "Dr. Sarah Jenkins",
       title: "Data Structures & Algorithms (DSA)",
       description: "Master essential computer science data structures, graph algorithms, dynamic programming, and Big O time complexity analysis.",
       published: true,
@@ -49,6 +85,7 @@ async function seedFullCourses() {
 
     // Course 2: Object-Oriented Programming (OOP)
     {
+      instructorName: "Elena Rostova",
       title: "Object-Oriented Programming (OOP)",
       description: "Master modern software engineering concepts including encapsulation, inheritance, polymorphism, design patterns, and SOLID principles.",
       published: true,
@@ -70,6 +107,7 @@ async function seedFullCourses() {
 
     // Course 3: Artificial Intelligence & Machine Learning
     {
+      instructorName: "Dr. Alex Chen",
       title: "Artificial Intelligence & Machine Learning",
       description: "Comprehensive guide to neural networks, supervised/unsupervised learning, deep learning, NLP, transformers, and LLM applications.",
       published: true,
@@ -91,6 +129,7 @@ async function seedFullCourses() {
 
     // Course 4: Modern Web Programming (Full-Stack Next.js & React)
     {
+      instructorName: "Muhammad Abdullah",
       title: "Modern Web Programming (Full-Stack Next.js & React)",
       description: "Build production-ready web applications using HTML5, Vanilla CSS, TypeScript, React 19, Next.js App Router, and Supabase PostgreSQL.",
       published: true,
@@ -112,6 +151,7 @@ async function seedFullCourses() {
 
     // Course 5: Programming Fundamentals
     {
+      instructorName: "David K. Miller",
       title: "Programming Fundamentals",
       description: "Essential introduction to computer programming, algorithmic problem-solving, control flow, functions, memory, and version control.",
       published: true,
@@ -133,6 +173,7 @@ async function seedFullCourses() {
 
     // Course 6: Database Systems & SQL Engineering
     {
+      instructorName: "Elena Rostova",
       title: "Database Systems & SQL Engineering",
       description: "Master relational database architecture, ER modeling, SQL queries, B-Tree indexes, transactions, ACID compliance, and NoSQL systems.",
       published: true,
@@ -154,6 +195,7 @@ async function seedFullCourses() {
 
     // Course 7: Operating Systems & System Architecture
     {
+      instructorName: "Prof. Marcus Vance",
       title: "Operating Systems & System Architecture",
       description: "Deep dive into OS kernel internals, process management, CPU scheduling, concurrency, virtual memory, file systems, and system calls.",
       published: true,
@@ -175,6 +217,7 @@ async function seedFullCourses() {
 
     // Course 8: Computer Networks & Distributed Systems
     {
+      instructorName: "David K. Miller",
       title: "Computer Networks & Distributed Systems",
       description: "Explore TCP/IP networking stack, IP routing, socket programming, HTTP/HTTPS protocols, network security, and cloud architectures.",
       published: true,
@@ -196,6 +239,7 @@ async function seedFullCourses() {
 
     // Course 9: Software Engineering & Agile Methodologies
     {
+      instructorName: "Muhammad Abdullah",
       title: "Software Engineering & Agile Methodologies",
       description: "Master modern software development lifecycles, Agile Scrum, microservices design, TDD testing, CI/CD pipelines, and software quality.",
       published: true,
@@ -217,6 +261,7 @@ async function seedFullCourses() {
 
     // Course 10: Cybersecurity & Ethical Hacking
     {
+      instructorName: "David K. Miller",
       title: "Cybersecurity & Ethical Hacking",
       description: "Learn penetration testing, ethical hacking, OWASP Top 10 vulnerabilities, cryptography, malware analysis, and network defense.",
       published: true,
@@ -238,6 +283,7 @@ async function seedFullCourses() {
 
     // Course 11: Computer Architecture & Assembly Language
     {
+      instructorName: "Prof. Marcus Vance",
       title: "Computer Architecture & Assembly Language",
       description: "Explore digital logic gates, CPU microarchitecture, x86/ARM assembly programming, memory hierarchies, pipelining, and RISC-V.",
       published: true,
@@ -259,6 +305,7 @@ async function seedFullCourses() {
 
     // Course 12: Theory of Computation & Automata
     {
+      instructorName: "Dr. Sarah Jenkins",
       title: "Theory of Computation & Automata",
       description: "Master formal languages, deterministic/non-deterministic finite automata, context-free grammars, Turing machines, P vs NP, and decidability.",
       published: true,
@@ -280,15 +327,26 @@ async function seedFullCourses() {
   ];
 
   for (const cData of coursesData) {
-    // Upsert course to avoid duplicates
+    const assignedInstructorId = instructorMap[cData.instructorName] || instructorMap["Muhammad Abdullah"];
+
+    // Find existing course or create new
     let course = await prisma.course.findFirst({
       where: { title: cData.title },
     });
 
-    if (!course) {
+    if (course) {
+      course = await prisma.course.update({
+        where: { id: course.id },
+        data: {
+          instructorId: assignedInstructorId,
+          description: cData.description,
+          published: cData.published,
+        },
+      });
+    } else {
       course = await prisma.course.create({
         data: {
-          instructorId: instructor.id,
+          instructorId: assignedInstructorId,
           title: cData.title,
           description: cData.description,
           published: cData.published,
@@ -296,7 +354,7 @@ async function seedFullCourses() {
       });
     }
 
-    console.log(`\n📚 Course: ${course.title} (ID: ${course.id})`);
+    console.log(`\n📚 Course: ${course.title} (Instructor: ${cData.instructorName})`);
 
     // Create 12 lessons for this course
     for (let i = 0; i < cData.lessons.length; i++) {
@@ -322,12 +380,12 @@ async function seedFullCourses() {
     }
   }
 
-  console.log("\n🎉 Full 12-Course CS Degree Curriculum (144 Modules Total) successfully seeded into Supabase!");
+  console.log("\n🎉 6 Real Faculty Members & 12 CS Degree Courses successfully seeded into Supabase!");
 }
 
-seedFullCourses()
+seedFullCoursesWithFaculty()
   .catch((e) => {
-    console.error("❌ Error seeding full courses:", e);
+    console.error("❌ Error seeding faculty & courses:", e);
     process.exit(1);
   })
   .finally(async () => {

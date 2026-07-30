@@ -28,7 +28,7 @@ export function AdminCourseList({ courses: initialCourses }: AdminCourseListProp
 
   const handleTogglePublish = (courseId: string, currentStatus: boolean) => {
     startTransition(async () => {
-      const res = await toggleCoursePublishedAdminAction(courseId);
+      const res = await toggleCoursePublishedAdminAction(courseId, !currentStatus);
       if (res.success) {
         setCourses((prev) =>
           prev.map((c) => (c.id === courseId ? { ...c, published: !currentStatus } : c))
