@@ -10,8 +10,16 @@ const globalForPrisma = globalThis as unknown as {
 
 const connectionString = process.env.DATABASE_URL!;
 
-// Reuse global pg.Pool instance in development to prevent pool leak warnings
-const pool = globalForPrisma.pool ?? new pg.Pool({ connectionString });
+// Reuse global pg.Pool instance and configure strict pool size for serverless environments
+const pool =
+  globalForPrisma.pool ??
+  new pg.Pool({
+    connectionString,
+    max: process.env.NODE_ENV === "production" ? 3 : 5, // Strict limit to prevent EMAXCONNSESSION on Supabase
+    idleTimeoutMillis: 5000, // Close idle connections quickly
+    connectionTimeoutMillis: 5000, // Timeout fast if pool is busy
+  });
+
 const adapter = new PrismaPg(pool);
 
 export const prisma =
