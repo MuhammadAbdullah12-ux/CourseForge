@@ -3,14 +3,33 @@ import { currentUser } from "@clerk/nextjs/server";
 
 /**
  * Safely resolves or provisions a user in Supabase PostgreSQL by clerkId OR email.
- * Intelligently merges duplicate seeded records and prevents clerkId unique constraint crashes.
+ * Intelligently merges duplicate seeded records and updates roles dynamically.
  */
-export async function syncUserWithDatabase(defaultRole: "STUDENT" | "INSTRUCTOR" | "ADMIN" = "STUDENT") {
+export async function syncUserWithDatabase(requestedRole?: "STUDENT" | "INSTRUCTOR" | "ADMIN") {
   const clerkUser = await currentUser();
   if (!clerkUser) return null;
 
   const userId = clerkUser.id;
-  const primaryEmail = clerkUser.emailAddresses[0]?.emailAddress || `${userId}@placeholder.com`;
+  const primaryEmail = (clerkUser.emailAddresses[0]?.emailAddress || `${userId}@placeholder.com`).toLowerCase();
+
+  // Helper to determine if email belongs to an instructor or admin
+  const isDevAdmin = primaryEmail.includes("abdullah") || primaryEmail.includes("ranaabdullah");
+  const isSeededInstructor =
+    primaryEmail.includes("sarah") ||
+    primaryEmail.includes("alex") ||
+    primaryEmail.includes("marcus") ||
+    primaryEmail.includes("elena") ||
+    primaryEmail.includes("david") ||
+    primaryEmail.includes("instructor");
+
+  let targetRole: "STUDENT" | "INSTRUCTOR" | "ADMIN" = "STUDENT";
+  if (isDevAdmin) {
+    targetRole = "ADMIN";
+  } else if (requestedRole) {
+    targetRole = requestedRole;
+  } else if (isSeededInstructor) {
+    targetRole = "INSTRUCTOR";
+  }
 
   // 1. Check for existing row by exact clerkId
   const userByClerkId = await prisma.user.findUnique({
@@ -22,10 +41,9 @@ export async function syncUserWithDatabase(defaultRole: "STUDENT" | "INSTRUCTOR"
     where: { email: primaryEmail },
   });
 
-  // Case A: Both exist on DIFFERENT rows (e.g. a placeholder clerkId row + a seeded email row)
+  // Case A: Both exist on DIFFERENT rows (e.g. placeholder clerkId row + seeded email row)
   if (userByClerkId && userByEmail && userByClerkId.id !== userByEmail.id) {
     try {
-      // Re-assign enrollments & quizAttempts to the primary email row before deleting the duplicate
       await prisma.enrollment.updateMany({
         where: { userId: userByClerkId.id },
         data: { userId: userByEmail.id },
@@ -36,15 +54,16 @@ export async function syncUserWithDatabase(defaultRole: "STUDENT" | "INSTRUCTOR"
         data: { userId: userByEmail.id },
       }).catch(() => {});
 
-      // Remove stale placeholder row to free up the clerkId constraint
       await prisma.user.delete({
         where: { id: userByClerkId.id },
       }).catch(() => {});
 
-      // Link actual Clerk userId to the seeded student email row
       return await prisma.user.update({
         where: { id: userByEmail.id },
-        data: { clerkId: userId },
+        data: {
+          clerkId: userId,
+          role: targetRole !== "STUDENT" ? targetRole : userByEmail.role,
+        },
       });
     } catch (e) {
       return userByEmail;
@@ -53,11 +72,17 @@ export async function syncUserWithDatabase(defaultRole: "STUDENT" | "INSTRUCTOR"
 
   // Case B: Row exists by clerkId
   if (userByClerkId) {
-    if (userByClerkId.email !== primaryEmail) {
+    const needRoleUpdate = targetRole !== "STUDENT" && userByClerkId.role !== targetRole && userByClerkId.role !== "ADMIN";
+    const needEmailUpdate = userByClerkId.email !== primaryEmail;
+
+    if (needRoleUpdate || needEmailUpdate) {
       try {
         return await prisma.user.update({
           where: { id: userByClerkId.id },
-          data: { email: primaryEmail },
+          data: {
+            email: primaryEmail,
+            role: needRoleUpdate ? targetRole : userByClerkId.role,
+          },
         });
       } catch (e) {
         return userByClerkId;
@@ -66,12 +91,16 @@ export async function syncUserWithDatabase(defaultRole: "STUDENT" | "INSTRUCTOR"
     return userByClerkId;
   }
 
-  // Case C: Row exists by email (e.g. seeded student)
+  // Case C: Row exists by email
   if (userByEmail) {
+    const needRoleUpdate = targetRole !== "STUDENT" && userByEmail.role !== targetRole && userByEmail.role !== "ADMIN";
     try {
       return await prisma.user.update({
         where: { id: userByEmail.id },
-        data: { clerkId: userId },
+        data: {
+          clerkId: userId,
+          role: needRoleUpdate ? targetRole : userByEmail.role,
+        },
       });
     } catch (e) {
       return userByEmail;
@@ -84,7 +113,7 @@ export async function syncUserWithDatabase(defaultRole: "STUDENT" | "INSTRUCTOR"
       data: {
         clerkId: userId,
         email: primaryEmail,
-        role: defaultRole,
+        role: targetRole,
       },
     });
   } catch (err) {

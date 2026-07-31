@@ -44,9 +44,13 @@ export function Navbar({ userId, userRole }: NavbarProps) {
     setIsMobileMenuOpen((prev) => !prev);
   };
 
-  const isAdmin = userRole === "ADMIN";
-  const isInstructor = userRole === "INSTRUCTOR";
-  const isStudent = userRole === "STUDENT" || (!isAdmin && !isInstructor);
+  // Determine active portal mode based on database role AND current active route pathname
+  const isAdminPath = pathname.startsWith("/dashboard/admin");
+  const isInstructorPath = pathname.startsWith("/dashboard/instructor");
+
+  const isAdmin = userRole === "ADMIN" || isAdminPath;
+  const isInstructor = (userRole === "INSTRUCTOR" || isInstructorPath) && !isAdminPath;
+  const isStudent = !isAdmin && !isInstructor;
 
   return (
     <header className="border-b border-slate-800/80 bg-slate-950/75 backdrop-blur-xl sticky top-0 z-50 transition-all">
@@ -140,7 +144,7 @@ export function Navbar({ userId, userRole }: NavbarProps) {
                 }`}
               >
                 <BarChart3 className="size-3.5 text-cyan-400" />
-                <span>Analytics</span>
+                <span>Quiz Analytics</span>
               </Link>
 
               {userId && (
@@ -149,7 +153,7 @@ export function Navbar({ userId, userRole }: NavbarProps) {
                   className="px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold text-cyan-300 bg-cyan-500/15 border border-cyan-500/40 hover:bg-cyan-400 hover:text-slate-950 hover:scale-105 transition-all flex items-center gap-1.5 shadow-md shadow-cyan-500/10"
                 >
                   <Briefcase className="size-3.5" />
-                  <span>Instructor Portal</span>
+                  <span>Instructor Dashboard</span>
                 </Link>
               )}
             </>
@@ -167,7 +171,7 @@ export function Navbar({ userId, userRole }: NavbarProps) {
                 }`}
               >
                 <UserCog className="size-3.5 text-purple-400" />
-                <span>User Directory</span>
+                <span>User Governance</span>
               </Link>
 
               <Link 
@@ -178,7 +182,7 @@ export function Navbar({ userId, userRole }: NavbarProps) {
                     : "text-slate-300 hover:text-purple-400 hover:bg-slate-900"
                 }`}
               >
-                <Sliders className="size-3.5 text-purple-400" />
+                <BookOpen className="size-3.5 text-purple-400" />
                 <span>Course Moderation</span>
               </Link>
 
@@ -190,8 +194,8 @@ export function Navbar({ userId, userRole }: NavbarProps) {
                     : "text-slate-300 hover:text-purple-400 hover:bg-slate-900"
                 }`}
               >
-                <BarChart3 className="size-3.5 text-purple-400" />
-                <span>Telemetry</span>
+                <Sliders className="size-3.5 text-purple-400" />
+                <span>System Telemetry</span>
               </Link>
 
               {userId && (
@@ -318,12 +322,20 @@ export function Navbar({ userId, userRole }: NavbarProps) {
                 <span>+ Create AI Course</span>
               </Link>
               <Link
+                href="/dashboard/instructor/analytics"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center gap-2.5 p-2.5 rounded-xl text-sm font-medium text-slate-200 hover:bg-slate-900 hover:text-cyan-400 transition-colors"
+              >
+                <BarChart3 className="size-4 text-cyan-400" />
+                <span>Quiz Analytics</span>
+              </Link>
+              <Link
                 href="/dashboard/instructor"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="flex items-center gap-2.5 p-2.5 rounded-xl text-sm font-bold text-cyan-300 bg-cyan-500/15 border border-cyan-500/30"
               >
                 <Briefcase className="size-4 text-cyan-400" />
-                <span>Instructor Portal</span>
+                <span>Instructor Dashboard</span>
               </Link>
             </>
           )}
@@ -337,7 +349,23 @@ export function Navbar({ userId, userRole }: NavbarProps) {
                 className="flex items-center gap-2.5 p-2.5 rounded-xl text-sm font-medium text-slate-200 hover:bg-slate-900 hover:text-purple-400 transition-colors"
               >
                 <UserCog className="size-4 text-purple-400" />
-                <span>User Directory</span>
+                <span>User Governance</span>
+              </Link>
+              <Link
+                href="/dashboard/admin/courses"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center gap-2.5 p-2.5 rounded-xl text-sm font-medium text-slate-200 hover:bg-slate-900 hover:text-purple-400 transition-colors"
+              >
+                <BookOpen className="size-4 text-purple-400" />
+                <span>Course Moderation</span>
+              </Link>
+              <Link
+                href="/dashboard/admin/telemetry"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center gap-2.5 p-2.5 rounded-xl text-sm font-medium text-slate-200 hover:bg-slate-900 hover:text-purple-400 transition-colors"
+              >
+                <Sliders className="size-4 text-purple-400" />
+                <span>System Telemetry</span>
               </Link>
               <Link
                 href="/dashboard/admin"
@@ -350,22 +378,14 @@ export function Navbar({ userId, userRole }: NavbarProps) {
             </>
           )}
 
+          {/* Actionable Switch Mode Link in Mobile */}
           <Link
             href="/select-role"
             onClick={() => setIsMobileMenuOpen(false)}
-            className={`w-full flex items-center justify-between p-2.5 rounded-xl text-xs font-semibold border ${
-              isAdmin
-                ? "bg-purple-500/10 text-purple-400 border-purple-500/30"
-                : isInstructor
-                ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/30"
-                : "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
-            }`}
+            className="flex items-center justify-center gap-2 p-2.5 rounded-xl text-xs font-bold border border-slate-700 bg-slate-900 text-slate-200 hover:bg-slate-800"
           >
-            <span className="flex items-center gap-2">
-              <RefreshCw className="size-3" />
-              <span>Switch Mode</span>
-            </span>
-            <span className="text-[11px] underline">Choose Role</span>
+            <RefreshCw className="size-3.5 text-emerald-400" />
+            <span>Switch Access Mode 🔄</span>
           </Link>
         </div>
       )}
